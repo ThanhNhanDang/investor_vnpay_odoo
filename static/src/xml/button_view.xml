@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.NavBar" t-inherit-mode="extension">
+        <xpath expr="//t[@t-foreach='systrayItems']" position="before">
+            <t t-if="state.isUserInvestor">
+                <div class= "o-dropdown dropdown d-none d-md-flex align-items-center gap-3">
+                    <button class="btn btn-info " type="button" t-on-click="onRecharge">
+                            NẠP TIỀN
+                        <i class="fa fa-credit-card"></i>
+                    </button>
+                    <div class="text-end text-white">
+                        <strong> SỐ DƯ: <span t-out="state.crypto_wallet"/> VND</strong> 
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </t>
+    <t t-inherit="web.BurgerMenu" t-inherit-mode="extension">
+        <xpath expr="//ul[@class='ps-0 mb-0']" position="before">
+            <t t-if="state.isUserInvestor">
+                <div class="mx-1 d-flex align-items-center gap-3" style="box-shadow: inset 0 -1px 0 var(--border-color, #dee2e6);">
+                    <button class="btn btn-info my-2 text-white" type="button" t-on-click="onRecharge">
+                                NẠP TIỀN
+                            <i class="fa fa-credit-card"></i>
+                    </button>
+                    <div class="text-end">
+                        <strong>SỐ DƯ:</strong> 
+                        <span t-out="state.crypto_wallet"/> VND
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

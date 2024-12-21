@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="product_view_form_packet_money" model="ir.ui.view">
+            <field name="name">product.template.form.packet.money</field>
+            <field name="model">product.template</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet class="fs-1"
+                        style="border: 0px solid #ccc; max-width: 800px; margin-left: auto; margin-right: auto;">
+                        <group>
+                            <field name="name" invisible="1" />
+                            <field name="isPacketMoney" invisible="1"
+                            />
+                            <field name="connect_coffee_company_id" />
+                            <field name="list_price" widget="monetary"
+                                class="me-5" string="Số tiền"
+                                options="{'currency_field': 'currency_id'}" />
+                            <field name="currency_id" string="Đơn vị" invisible="1" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="product_view_form_packet_money_kanban" model="ir.ui.view">
+            <field name="name">product.template.form.packet.money.kanban</field>
+            <field name="model">product.template</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="list_price" />
+                    <field name="currency_id" />
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click"
+                                style="height: 250px;">
+                                <div
+                                    class="flex-column"
+                                    t-attf-style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; border-radius: 10px;">
+                                    <strong style="font-size: 3.5em; color: black;">
+                                        <field name="list_price" widget="monetary"
+                                            options="{'currency_field': 'currency_id'}" />
+                                    </strong>
+                                    <field name="connect_coffee_company_id" />
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+    </data>
+</odoo>
