@@ -122,7 +122,7 @@ class PaymentProviderVNPay(models.Model):
         if not provider:
             return False
         order_reference = self.generate_transaction_id(prefix="PAY")
-        base_url = "https://guided-lightly-caiman.ngrok-free.app"
+        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
         language = "vn" if self.env.context.get(
             'lang', self.env.user.lang) == 'vi_VN' else "en"
         float_amount = round(float(amount), 2)
