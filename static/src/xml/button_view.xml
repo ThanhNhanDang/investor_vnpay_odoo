@@ -24,7 +24,7 @@
                             <i class="fa fa-credit-card"></i>
                     </button>
                     <div class="text-end">
-                        <strong>SỐ DƯ:</strong> 
+                        <strong>SỐ DƯ: </strong> 
                         <span t-out="state.crypto_wallet"/> VND
                     </div>
                 </div>

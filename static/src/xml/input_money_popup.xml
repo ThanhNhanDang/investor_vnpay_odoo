@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="InputMoneyPopup">
+        <div class="o_dialog" id="dialog_0">
+            <div role="dialog" class="modal d-block o_technical_modal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content" style="top: 0px; left: 0px;">
+                        <header class="modal-header">
+                            <h4 class="modal-title text-break"><t t-esc="props.title"/></h4>
+                            <button type="button" class="btn-close" aria-label="Close" t-on-click="()=>this.cancel()" tabindex="-1">
+                            </button>
+                        </header>
+                        <div class="px-4 py-3 border-bottom">
+                            <div class="d-flex gap-2">
+                                <div class="input-group flex-nowrap" style="width: auto;">
+                                    <input 
+                                        type="text" 
+                                        class="form-control fs-4 text-end" 
+                                        t-ref="moneyInput"
+                                        t-on-input="handleInput"
+                                        t-on-keydown="handleKeyDown"
+                                        placeholder="Nhập số tiền"
+                                        t-model="state.formattedAmount"
+                                        style="font-size: 1.5rem !important; min-width: 200px;"
+                                    />
+                                    <span class="input-group-text fs-4">₫</span>
+                                </div>
+                                <button 
+                                    class="btn btn-primary fs-4" 
+                                    t-on-click="()=>this.confirm()"
+                                    t-att-disabled="state.isDisable"
+                                    style="white-space: nowrap;">
+                                    Xác nhận
+                                </button>
+                            </div>
+                        </div>
+                        <footer class="modal-footer justify-content-around justify-content-md-start flex-wrap gap-1 w-100" style="order:2">
+                            <button class="btn o_form_button_cancel btn-primary" t-on-click="()=>this.cancel()" data-hotkey="z">
+                            Đóng</button>
+                           
+                        </footer>
+                        <main class="modal-body p-0">
+                            <div style="min-height:400px;">
+                                <div class="o_kanban_view o_view_controller">
+                                    <div class="o_content">
+                                        <div class="o_kanban_renderer o_renderer d-flex o_kanban_ungrouped align-content-start flex-wrap justify-content-around">
+                                            <t t-foreach="props.list_packet_money" t-as="packet" t-key="packet">
+                                                <div role="article" class="o_kanban_record d-flex flex-grow-0" 
+                                                     data-id="datapoint_3" tabindex="0" 
+                                                     style="width: 200px; margin: 8px; transition: transform 0.2s;">
+                                                    <div class="oe_kanban_global_click" t-on-click="()=>this.confirm(packet)"  t-attf-style="height: 180px; width: 100%;border-radius: 10px; 
+                                                                         background: #{packet.includes('1,000,000') ? '#E3F2FD' :
+                                                                                      packet.includes('5,000,000') ? '#BBDEFB' :
+                                                                                      packet.includes('10,000,000') ? '#90CAF9' :
+                                                                                      packet.includes('20,000,000') ? '#64B5F6' :
+                                                                                      packet.includes('50,000,000') ? '#2196F3' :
+                                                                                      packet.includes('100,000,000') ? '#1E88E5' :
+                                                                                      packet.includes('150,000,000') ? '#1976D2' : '#1565C0'};
+                                                                          box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                                        <div  style="width: 100%; height: 100%; display: flex; 
+                                                            justify-content: center; align-items: center; 
+                                                            cursor: pointer;">
+                                                            <strong t-attf-style="font-size: 2em; 
+                                                                                color: #{packet.includes('1,000,000') ? '#1565C0' :
+                                                                                        packet.includes('5,000,000') ? '#1565C0' :
+                                                                                        packet.includes('10,000,000') ? '#1565C0' :
+                                                                                        packet.includes('20,000,000') ? '#ffffff' :
+                                                                                        packet.includes('50,000,000') ? '#ffffff' :
+                                                                                        packet.includes('100,000,000') ? '#ffffff' :
+                                                                                        packet.includes('150,000,000') ? '#ffffff' : '#ffffff'};">
+
+                                                                <div name="list_price" class="o_field_widget o_field_monetary">
+                                                                    <span><t t-esc="packet"/> ₫</span>
+                                                                </div>
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

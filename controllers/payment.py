@@ -65,9 +65,6 @@ class VNPayController(http.Controller):
     )
     def process_successful_payment(self, **params):
         # Tạo hóa đơn
-        product = request.env['product.template'].search(
-            [("id", "=", params['product_id'])], limit=1)
-
         # invoice = self._create_invoice(
         #     params['amount'], params['partner_id'], product.id, params['reference'])
 
