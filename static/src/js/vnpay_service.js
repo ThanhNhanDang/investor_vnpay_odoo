@@ -123,12 +123,12 @@ export const vnpayService = {
     async function onRecharge(partner_id_input, crypto_wallet_input) {
       partner_id = partner_id_input;
       crypto_wallet = crypto_wallet_input;
-      let viewKanban = await orm.searchRead(
-        "ir.model.data",
-        [["name", "=", "product_view_form_packet_money_kanban"]],
-        ["res_id"]
-      );
-      const viewKanbanId = viewKanban[0].res_id;
+      // let viewKanban = await orm.searchRead(
+      //   "ir.model.data",
+      //   [["name", "=", "product_view_form_packet_money_kanban"]],
+      //   ["res_id"]
+      // );
+      // const viewKanbanId = viewKanban[0].res_id;
       await popup.add(InputMoneyPopup, {
         title: _t("Nhập Số Tiền Bạn Muốn Nạp!"),
         list_packet_money: [
