@@ -5,12 +5,13 @@ import { InputMoneyPopup } from "./input_money_popup";
 import { _t } from "@web/core/l10n/translation";
 
 export const vnpayService = {
-  dependencies: ["notification", "orm", "rpc", "popup"],
-  start(env, { notification, dialog, orm, rpc, popup }) {
+  dependencies: ["notification", "orm", "rpc", "popup", "user"],
+  start(env, { notification, orm, rpc, popup, user }) {
     let partner_id = 0;
     let messageCallback;
     let messageCallback1;
     let crypto_wallet = 0;
+    let lang = user.lang.replace("_", "-");
     async function createVnpayUrl(amount) {
       try {
         const paymentUrl = await orm.call(
@@ -67,16 +68,32 @@ export const vnpayService = {
       return;
     }
 
-    function formatAmount(Amount) {
-      return Number(Amount).toLocaleString("en-US");
+    function formatAmount(amount) {
+      try {
+        return Number(amount).toLocaleString(lang, {
+          maximumFractionDigits: 0,
+          minimumFractionDigits: 0,
+        });
+      } catch (error) {
+        console.error("Error formatting amount:", error);
+        return Number(amount).toLocaleString("en-US");
+      }
     }
     function reverseFormatAmount(formattedAmount) {
-      if (formattedAmount == undefined) return 0;
-      // Loại bỏ tất cả dấu phẩy và khoảng trắng
-      const cleanAmount = formattedAmount.replace(/[,\s]/g, "");
-      // Chuyển đổi thành số
-      const number = parseInt(cleanAmount);
-      return number;
+      if (!formattedAmount) return 0;
+
+      // Get the thousands separator for the given locale
+      const locale = new Intl.NumberFormat(lang).format(1111).replace(/1/g, "");
+
+      // Create a RegExp to remove the locale-specific separator
+      const separatorRegex = new RegExp(`[${locale}\\s]`, "g");
+
+      // Remove locale-specific separators
+      const cleanAmount = formattedAmount.replace(separatorRegex, "");
+
+      // Convert to number
+      const number = parseInt(cleanAmount, 10);
+      return isNaN(number) ? 0 : number;
     }
     async function savePayment(data) {
       if (data.vnp_ResponseCode == "00") {
@@ -93,9 +110,12 @@ export const vnpayService = {
           payment_method: "pay",
           reference: data.order_id,
         });
-        notification.add(_t(`Nạp ${formatAmount(data.vnp_Amount)} ₫ thành công!!`), {
-          type: "success",
-        });
+        notification.add(
+          _t(`Nạp ${formatAmount(data.vnp_Amount)} ₫ thành công!!`),
+          {
+            type: "success",
+          }
+        );
         return crypto_wallet;
       }
     }
@@ -112,14 +132,14 @@ export const vnpayService = {
       await popup.add(InputMoneyPopup, {
         title: _t("Nhập Số Tiền Bạn Muốn Nạp!"),
         list_packet_money: [
-          "1,000,000",
-          "5,000,000",
-          "10,000,000",
-          "20,000,000",
-          "50,000,000",
-          "100,000,000",
-          "150,000,000",
-          "200,000,000",
+          "1000000",
+          "5000000",
+          "10000000",
+          "30000000",
+          "50000000",
+          "100000000",
+          "150000000",
+          "200000000",
         ],
       });
     }
@@ -128,11 +148,11 @@ export const vnpayService = {
       onRecharge: (partner_id_input, crypto_wallet_input) => {
         onRecharge(partner_id_input, crypto_wallet_input);
       },
-      formatAmount: (Amount) => {
-        return formatAmount(Amount);
+      formatAmount: (amount) => {
+        return formatAmount(amount);
       },
-      reverseFormatAmount: (Amount) => {
-        return reverseFormatAmount(Amount);
+      reverseFormatAmount: (formattedAmount) => {
+        return reverseFormatAmount(formattedAmount);
       },
       messageCallback: (callback) => {
         messageCallback = callback;

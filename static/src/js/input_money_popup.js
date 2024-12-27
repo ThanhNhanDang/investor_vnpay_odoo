@@ -71,7 +71,7 @@ export class InputMoneyPopup extends Component {
     this.props.close({ confirmed: true, payload: null });
     await this.vnpay.paynow(
       this.vnpay.reverseFormatAmount(input_money_popup) ||
-      this.vnpay.reverseFormatAmount(this.state.formattedAmount)
+        this.vnpay.reverseFormatAmount(this.state.formattedAmount)
     );
   }
   cancel() {
@@ -84,6 +84,41 @@ export class InputMoneyPopup extends Component {
         this.confirm();
       }
     }
+  }
+
+  getColors(amount) {
+    // Convert amount to number if it's a string
+    const value =
+      typeof amount === "string"
+        ? parseFloat(amount.replace(/[^0-9.-]+/g, ""))
+        : amount;
+
+    // Define color stops for background (from lighter to darker)
+    const colorStops = [
+      { threshold: 1000000, bg: "#E3F2FD", text: "#000000" }, // Lightest blue
+      { threshold: 5000000, bg: "#BBDEFB", text: "#000000" },
+      { threshold: 10000000, bg: "#90CAF9", text: "#000000" },
+      { threshold: 30000000, bg: "#64B5F6", text: "#000000" },
+      { threshold: 50000000, bg: "#2196F3", text: "#FFFFFF" },
+      { threshold: 100000000, bg: "#1E88E5", text: "#FFFFFF" },
+      { threshold: 150000000, bg: "#1976D2", text: "#FFFFFF" },
+      { threshold: 200000000, bg: "#1565C0", text: "#FFFFFF" }, // Darkest blue
+    ];
+
+    // Find appropriate color stop
+    const colorStop =
+      colorStops.find((stop) => value <= stop.threshold) ||
+      colorStops[colorStops.length - 1];
+
+    return {
+      backgroundColor: colorStop.bg,
+      textColor: colorStop.text,
+    };
+  }
+
+  getStyle(amount) {
+    const colors = this.getColors(amount);
+    return `background: ${colors.backgroundColor};color: ${colors.textColor};height: 180px; width: 100%;border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);`;
   }
 
   handleInput(event) {

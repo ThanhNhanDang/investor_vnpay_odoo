@@ -1,10 +1,7 @@
 <odoo>
     <data>
         <!-- Start Investor Manager -->
-        <menuitem id="menu_action_configuration" groups="investor.user_investor_manager"
-            sequence="1"
-            name="Cấu Hình" parent="investor.investor_menu_root"
-        />
+    
         <record id="action_packet_money_configuration" model="ir.actions.server">
             <field name="name">Gói Nạp Tiền</field>
             <field name="model_id" ref="model_product_template" />
@@ -12,8 +9,8 @@
             <field name="code">action = model._action_show()</field>
         </record>
         <menuitem id="menu_action_packet_money_configuration"
-            sequence="0"
-            name="Gói Nạp Tiền" parent="menu_action_configuration"
+            sequence="10"
+            name="Gói Nạp Tiền" parent="investor.menu_action_configuration"
             action="action_packet_money_configuration"
         />
 
@@ -25,9 +22,9 @@
         </record>
         <menuitem id="menu_payment_provider"
             name="Nhà Cung Cấp Dịch Vụ Thanh Toán"
-            parent="menu_action_configuration"
+            parent="investor.menu_action_configuration"
             action="action_payment_provider"
-            sequence="5" />
+            sequence="11" />
 
 
         <!-- End Investor Manager -->
