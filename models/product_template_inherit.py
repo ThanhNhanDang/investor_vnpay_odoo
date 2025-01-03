@@ -6,7 +6,6 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
     color_background = fields.Char(string="Màu nền gói tiền")
     
-    
     @api.onchange('list_price')
     def _onchange_list_price(self):
         if self.isPacketMoney:
@@ -33,7 +32,6 @@ class ProductTemplate(models.Model):
     def write(self, vals):
         new_record = super(ProductTemplate, self).write(vals)
         return new_record
-        
 
     def _action_show(self):
         view_form_id = self.env.ref(

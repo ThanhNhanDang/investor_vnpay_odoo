@@ -12,7 +12,7 @@
                             <field name="name" invisible="1" />
                             <field name="isPacketMoney" invisible="1"
                             />
-                            <field name="connect_coffee_company_id" />
+                            <field name="connect_coffee_company_id" options="{'no_create': True}" />
                             <field name="list_price" widget="monetary"
                                 class="me-5" string="Số tiền"
                                 options="{'currency_field': 'currency_id'}" />
@@ -26,12 +26,12 @@
             <field name="name">product.template.form.packet.money.kanban</field>
             <field name="model">product.template</field>
             <field name="arch" type="xml">
-                <kanban>
+                <kanban limit="6" default_order="create_date desc">
                     <field name="list_price" />
                     <field name="currency_id" />
                     <templates>
                         <t t-name="kanban-box">
-                            <div class="oe_kanban_global_click"
+                            <div class="oe_kanban_global_click" 
                                 style="height: 250px;">
                                 <div
                                     class="flex-column"
@@ -41,6 +41,10 @@
                                             options="{'currency_field': 'currency_id'}" />
                                     </strong>
                                     <field name="connect_coffee_company_id" />
+                                </div>
+                                <div class="delete-button text-end">
+                                    <a type="delete" name="delete_button"
+                                        class="fa fa-trash" />
                                 </div>
                             </div>
                         </t>

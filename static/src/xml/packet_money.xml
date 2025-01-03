@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="investor.packet_money" owl="1">
+        <div class="vh-100 overflow-auto bg-muted">
+            <div class="container-fluid shadow-sm border bg-white px-3">
+                <!-- Trường Công ty và nội dung -->
+                <div class="row my-2">
+                    <div class="col-12 col-md-4 mb-3 mb-md-0">
+                        <div class="d-flex flex-column align-items-start">
+                            <h3 class="fs-6 text-muted mb-2">Chi Nhánh:</h3>
+                            <select class="form-select" t-model="state.companyId" t-on-change="onChangeCompany">
+                                <t t-foreach="state.companyIds" t-as="value" t-key="value.id">
+                                    <option t-att-value="value.id" t-att-selected="value.id == state.companyId">
+                                        <t t-esc="value.name" />
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4" t-if="state.companyId !== 0">
+                        <div class="d-flex flex-column align-items-start">
+                            <h3 class="fs-6 text-muted mb-2">Số Tiền Đầu Tư Tối Đa:</h3>
+                            <div class="input-group flex-nowrap w-100">
+                                <input 
+                                    type="text" 
+                                    t-ref="moneyInput"
+                                    t-on-input="handleInput"
+                                    t-on-keydown="handleKeyDown"
+                                    class="form-control" 
+                                    t-model="state.maxAmount" 
+                                    placeholder="Nhập số tiền đầu tư tối đa"/>
+                                <span class="input-group-text fs-4">₫</span>
+                                <button class="btn btn-primary"
+                                        style="white-space: nowrap;"
+                                        t-att-disabled="state.isDisable" 
+                                        t-on-click="saveMaxAmount">
+                                    Lưu
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nội dung chính -->
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <div class="o_action_manager">
+                            <View t-props="viewPropsTreeViewReport"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-5"></div>
+            </div>
+        </div>
+    </t>
+</templates>
