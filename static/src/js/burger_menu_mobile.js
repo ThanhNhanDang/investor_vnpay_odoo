@@ -7,6 +7,7 @@ import { onWillStart, useState } from "@odoo/owl";
 patch(BurgerMenu.prototype, {
   setup() {
     super.setup();
+
     this.user = useService("user");
     this.vnpay = useService("vnpay");
     this.orm = useService("orm");
@@ -16,7 +17,6 @@ patch(BurgerMenu.prototype, {
       crypto_wallet: 0,
       partner_id: 0,
     });
-
     onWillStart(async () => {
       this._closeBurger();
       let investor = await this.user.hasGroup("investor.user_investor");
@@ -34,6 +34,14 @@ patch(BurgerMenu.prototype, {
         );
       }
     });
+
+    this.env.bus.addEventListener("update_crypto_wallet_mobile", (event) =>
+      this.trigger(event)
+    );
+  },
+  trigger(event) {
+    const { detail } = event;
+    this.messageCallback1(detail.crypto_wallet);
   },
   onRecharge() {
     this.vnpay.onRecharge(this.state.partner_id, this.state.crypto_wallet);

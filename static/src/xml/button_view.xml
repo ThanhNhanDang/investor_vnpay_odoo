@@ -4,6 +4,9 @@
         <xpath expr="//t[@t-foreach='systrayItems']" position="before">
             <t t-if="state.isUserInvestor">
                 <div class= "o-dropdown dropdown d-none d-md-flex align-items-center gap-3">
+                    <!-- <button class="btn btn-outline-success" t-on-click="onWithdrawMoney">
+                                    <i class="fa fa-credit-card" aria-hidden="true"></i> Rút tiền
+                                </button> -->
                     <button class="btn btn-info " type="button" t-on-click="onRecharge">
                             NẠP TIỀN
                         <i class="fa fa-credit-card"></i>

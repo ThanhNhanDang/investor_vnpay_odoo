@@ -24,6 +24,15 @@ patch(NavBar.prototype, {
         );
       }
     });
+
+    this.env.bus.addEventListener("update_crypto_wallet_nav", (event) =>
+      this.trigger(event)
+    );
+  },
+
+  trigger(event) {
+    const { detail } = event;
+    this.messageCallback(detail.crypto_wallet);
   },
   onRecharge() {
     this.vnpay.onRecharge(this.state.partner_id, this.state.crypto_wallet);
