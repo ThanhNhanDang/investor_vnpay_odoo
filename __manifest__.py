@@ -22,7 +22,6 @@
         "views/menu_item.xml",
         "views/payment_vnpay_view.xml",
         "views/payment_vnpay_template.xml",
-        "views/product_template.xml",
         "data/payment_method_data.xml",
         "data/payment_provider_data.xml",
     ],

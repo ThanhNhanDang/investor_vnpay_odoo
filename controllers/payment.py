@@ -38,17 +38,6 @@ _logger = logging.getLogger(__name__)
 
 
 class ParkingPaymentr(payment_portal.PaymentPortal):
-    
-    @http.route('/get/main_company', type='json', auth='user')
-    def get_main_company(self, **kwargs):
-        result = request.env.ref('base.main_company')
-        return {"currency_id":result.currency_id.id}
-    
-    @http.route('/company/save_max_amount', type='json', auth='user')
-    def save_max_amount(self, **kwargs):
-        result = request.env['res.company'].browse(kwargs['company_id']).write({'max_packet_amount': kwargs['max_packet_amount']})
-        return result
-
     @http.route('/parking/shop/payment/date', type='json', auth='user')
     def parking_paynow_date(self, **kwargs):
         params = {

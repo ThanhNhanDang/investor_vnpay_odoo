@@ -14,15 +14,6 @@
             name="Gói Nạp Tiền2" parent="investor.menu_action_configuration"
             action="action_packet_money_configuration2"
         /> -->
-        <record id="action_packet_money_configuration" model="ir.actions.client">
-            <field name="name">Gói Nạp Tiền</field>
-            <field name="tag">investor.packet_money</field>
-        </record>
-        <menuitem id="menu_action_packet_money_configuration"
-            sequence="10"
-            name="Gói Nạp Tiền" parent="investor.menu_action_configuration"
-            action="action_packet_money_configuration"
-        />
 
         <record id="action_payment_provider" model="ir.actions.act_window">
             <field name="name">Nhà Cung Cấp Dịch Vụ Thanh Toán</field>
@@ -31,6 +22,7 @@
             <field name="target">current</field>
         </record>
         <menuitem id="menu_payment_provider"
+            groups="investor.admin"
             name="Nhà Cung Cấp Dịch Vụ Thanh Toán"
             parent="investor.menu_action_configuration"
             action="action_payment_provider"
@@ -57,6 +49,20 @@
             groups="investor.user_investor"
             parent="payment_report_menu"
             name="Lịch Sử Nạp Tiền" action="action_payment_transaction_report_menu" sequence="2" />
+
+        <record id="action_invest_report_menu" model="ir.actions.server">
+            <field name="name">Lịch Sử Đầu Tư</field>
+            <field name="model_id" ref="investor.model_packet_invest_report" />
+            <field name="state">code</field>
+            <field name="code">action = model.action_show()</field>
+        </record>
+
+
+        <menuitem id="invest_report_menu"
+            groups="investor.user_investor"
+            parent="payment_report_menu"
+            name="Lịch Sử Đầu Tư" action="action_invest_report_menu" sequence="2" />
+
         <!-- End Investor -->
 
     </data>
