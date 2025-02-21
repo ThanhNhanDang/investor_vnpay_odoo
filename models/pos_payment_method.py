@@ -5,8 +5,6 @@ import hashlib
 import urllib.parse
 
 from odoo import _, api, fields, models
-from odoo.addons.payment_vnpay import const
-from odoo.addons.payment_vnpay.controllers.main import VNPayController
 
 _logger = logging.getLogger(__name__)
 
