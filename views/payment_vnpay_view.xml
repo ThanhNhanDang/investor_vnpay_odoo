@@ -49,6 +49,27 @@
             required="code == 'vnpay' and state != 'disabled'"
             readonly="1"
           />
+          <field name="vnpay_merchant_code"
+            required="code == 'vnpay' and state != 'disabled'"
+          />
+          <field name="vnpay_merchant_name"
+            required="code == 'vnpay' and state != 'disabled'"
+          />
+          <field name="vnpay_merchant_type"
+            required="code == 'vnpay' and state != 'disabled'"
+          />
+          <field name="vnpay_terminal_id"
+            required="code == 'vnpay' and state != 'disabled'"
+          />
+          <field name="vnpay_secret_key_qr"
+            required="code == 'vnpay' and state != 'disabled'"
+          />
+          <field name="vnpay_api_url_qr"
+            required="code == 'vnpay' and state != 'disabled'"
+          />
+          <field name="vnpay_appID_qr"
+            required="code == 'vnpay' and state != 'disabled'"
+          />
         </group>
       </group>
     </field>

@@ -4,15 +4,17 @@ import pytz
 from werkzeug import urls
 from datetime import datetime, timedelta
 import logging
-
+import requests
 import hmac
 import hashlib
 import urllib.parse
+import base64
+import qrcode
 
 from odoo import _, api, fields, models
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.investor_vnpay_odoo import const
-
+from io import BytesIO
 from odoo.addons.investor_vnpay_odoo.controllers.payment import VNPayController
 
 _logger = logging.getLogger(__name__)
@@ -60,7 +62,20 @@ class PaymentProviderVNPay(models.Model):
         required_if_provider="vnpay",
         default=_get_default_vnpay_ipn_url,
     )
-
+    
+    vnpay_merchant_code = fields.Char("Merchant Code")
+    vnpay_merchant_name = fields.Char("Merchant Name")
+    vnpay_merchant_type = fields.Char("Merchant Type")
+    vnpay_secret_key_qr = fields.Char("Secret Key QR")
+    vnpay_api_url_qr = fields.Char(
+        "API URL QR",
+        default="https://doitac-tran.vnpaytest.vn/QRCreateAPIRestV2/rest/CreateQrcodeApi/createQrcode"
+    )
+    vnpay_appID_qr = fields.Char("App ID QR")
+     # Define fields for VNPay's Tmn Code and Hash Secret
+    vnpay_terminal_id  = fields.Char(
+        string="vnpay_terminal_id", required_if_provider="vnpay"
+    )
     @api.model
     def _get_compatible_providers(
         self, *args, currency_id=None, is_validation=False, **kwargs
@@ -182,3 +197,95 @@ class PaymentProviderVNPay(models.Model):
         byteKey = key.encode("utf-8")
         byteData = data.encode("utf-8")
         return hmac.new(byteKey, byteData, hashlib.sha512).hexdigest()
+    
+    
+    def _vnpay_calculate_checksum(self, data, vnpay_secret_key_qr):
+        checksum_string = (
+            f"{data['appId']}|"
+            f"{data['merchantName']}|"
+            f"{data['serviceCode']}|"
+            f"{data['countryCode']}|"
+            f"{data['masterMerCode']}|"
+            f"{data['merchantType']}|"
+            f"{data['merchantCode']}|"
+            f"{data['terminalId']}|"
+            f"{data['payType']}|"
+            f"{data['productId']}|"
+            f"{data['txnId']}|"
+            f"{data['amount']}|"
+            f"{data['tipAndFee']}|"
+            f"{data['ccy']}|"
+            f"{data['expDate']}|"
+            f"{vnpay_secret_key_qr}"
+        )
+        return hashlib.md5(checksum_string.encode('utf-8')).hexdigest().upper()
+
+    def vnpay_generate_qr(self, amount, reference,expDate):
+        provider = self.sudo().search([('code', '=', 'vnpay')], limit=1)
+        request_data = {
+            "appId": provider.vnpay_appID_qr,
+            "merchantName": provider.vnpay_merchant_name,
+            "serviceCode": "03",
+            "countryCode": "VN",
+            "masterMerCode": "A000000775",
+            "merchantType": "9999",
+            "merchantCode": provider.vnpay_merchant_code,
+            "terminalId": provider.vnpay_terminal_id,
+            "payType": "03",
+            "productId": "",
+            "txnId": reference,
+            "amount": str(int(amount)),
+            "tipAndFee": "",
+            "ccy": "704",
+            "expDate": expDate,
+            "desc": f"Payment for order {reference}",
+            "billNumber": reference,
+            "consumerId": "",
+            "purpose": ""
+        }
+        
+        request_data["checksum"] = self._vnpay_calculate_checksum(request_data, provider.vnpay_secret_key_qr)
+        try:
+            response = requests.post(
+                provider.vnpay_api_url_qr,
+                json=request_data,
+                headers={"Content-Type": "text/plain"}
+            )
+            response_data = response.json()
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=3,
+                border=4,
+            )
+            qr = qrcode.QRCode(
+                border=0  # Loại bỏ viền trắng
+            )
+# Tạo ảnh QR không có viền trắng
+            qr.add_data(response_data.get('data'))
+            qr.make(fit=True)
+            
+            img = qr.make_image(fill="black", back_color="white").convert("RGB")
+            img = img.resize((250,250))
+            temp = BytesIO()
+            img.save(temp, format="PNG")
+            qr_image = base64.b64encode(temp.getvalue())
+            if response_data.get('code') == '00':
+                return {
+                    'success': True,
+                    'qr_data': qr_image,
+                    'qr_id': response_data.get('idQrcode')
+                }
+            else:
+                _logger.error(f"VNPAY QR Generation Error: {response_data.get('message')}")
+                return {
+                    'success': False,
+                    'error': response_data.get('message')
+                }
+                
+        except Exception as e:
+            _logger.error(f"VNPAY API Error: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
+            }

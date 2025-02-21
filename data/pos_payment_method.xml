@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Creates a new record in the 'payment.provider' model with the id 'payment_provider_vnpay'. -->
+    <record id="pos_payment_method_vnpay" model="pos.payment.method">
+        <field name="name">VNPay</field>
+        <field name="code">vnpay</field>
+        <field name="image" type="base64"
+            file="investor_vnpay_odoo/static/description/icon_provider.png" />
+        <field name="is_online_payment">1</field>
+        <field name="has_an_online_payment_provider">1</field>
+        <field name="type">online</field>
+        <field name="use_payment_terminal">0</field>
+        <field name="hide_use_payment_terminal">1</field>
+        <field name="outstanding_account_id">0</field>
+        <field name="receivable_account_id">0</field>
+        <field name="online_payment_provider_ids" eval="[Command.set([ref('investor_vnpay_odoo.payment_provider_vnpay')])]"/>
+
+    </record>
+</odoo>

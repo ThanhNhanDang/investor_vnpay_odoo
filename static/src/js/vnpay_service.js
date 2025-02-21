@@ -3,10 +3,12 @@
 import { registry } from "@web/core/registry";
 import { InputMoneyPopup } from "./input_money_popup";
 import { _t } from "@web/core/l10n/translation";
+import { user } from "@web/core/user";
+import { rpc } from "@web/core/network/rpc";
 
 export const vnpayService = {
-  dependencies: ["notification", "orm", "rpc", "popup", "user"],
-  start(env, { notification, orm, rpc, popup, user }) {
+  dependencies: ["notification", "orm", "popup"],
+  start(env, { notification, orm, popup }) {
     let partner_id = 0;
     let messageCallback;
     let messageCallback1;
