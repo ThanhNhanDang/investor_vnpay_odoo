@@ -1,6 +1,6 @@
 {
     # Tên module
-    'name': 'Investor VNPay Odoo',
+    'name': 'Investor VNPay Odoo 18.0',
     'version': '1.0',
 
     # Loại module
