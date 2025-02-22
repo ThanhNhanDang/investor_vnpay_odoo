@@ -57,6 +57,55 @@ class VNPayController(http.Controller):
     _query_url = "/payment/vnpay/query"
     # Get the IPN URL from the payment provider configuration.
     _ipn_url = "/payment/vnpay/webhook"
+    
+    def verify_checksum(self, data, secret_key):
+        """Hàm kiểm tra checksum của request."""
+        raw_string = "|".join(
+            [
+                data.get("code", ""),
+                data.get("msgType", ""),
+                data.get("txnId", ""),
+                data.get("qrTrace", ""),
+                data.get("bankCode", ""),
+                data.get("mobile", ""),
+                data.get("accountNo", ""),
+                data.get("amount", ""),
+                data.get("payDate", ""),
+                data.get("merchantCode", ""),
+                secret_key
+            ]
+        )
+        generated_checksum = hashlib.md5(raw_string.encode()).hexdigest().upper()
+        return generated_checksum == data.get("checksum")
+    
+    @http.route('/api/vnpay/payment', type='json', auth='public', methods=['POST'], csrf=False)
+    def process_payment(self, **post):
+        try:
+            data = request.jsonrequest
+            secret_key = "VNPAY"  # Secret key cần được bảo mật
+
+            # Kiểm tra checksum
+            if not self.verify_checksum(data, secret_key):
+                return {"code": "01", "message": "Checksum không hợp lệ"}
+
+            # Lưu giao dịch vào cơ sở dữ liệu Odoo (ví dụ lưu vào một model `payment.transaction`)
+            request.env['payment.transaction'].sudo().create({
+                'txn_id': data.get("txnId"),
+                'amount': data.get("amount"),
+                'mobile': data.get("mobile"),
+                'bank_code': data.get("bankCode"),
+                'merchant_code': data.get("merchantCode"),
+                'status': 'pending'
+            })
+
+            # Trả về phản hồi thành công
+            return {
+                "code": "00",
+                "message": "Đặt hàng thành công",
+                "data": {"txnId": data.get("txnId")}
+            }
+        except Exception as e:
+            return {"code": "99", "message": "Lỗi hệ thống", "error": str(e)}
 
     @http.route(
         "/payment/vnpay/create_invoice",

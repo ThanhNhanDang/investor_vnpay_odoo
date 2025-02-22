@@ -163,6 +163,7 @@ patch(PaymentScreen.prototype, {
       let prevOnlinePaymentLine = null;
       let lastOrderServerOPData = null;
       for (const onlinePaymentLine of onlinePaymentLines) {
+        console.log(onlinePaymentLine)
         const onlinePaymentLineAmount = onlinePaymentLine.get_amount();
         // The local state is not aware if the online payment has already been done.
         lastOrderServerOPData =
