@@ -80,13 +80,14 @@ class VNPayController(http.Controller):
     
     @http.route('/api/vnpay-ipn/qr', type='http', auth='public', methods=['POST'], csrf=False,
         save_session=False)
-    def process_payment(self, **post):
-        _logger.info("handling redirection from Mollie with data:\n%s", pprint.pformat(post))
+    def process_payment(self):
+        data = request.get_json_data()
+        _logger.info("DATA:\n%s", request.get_json_data())
         try:
             secret_key = "vnpay@MERCHANT"  # Secret key cần được bảo mật
 
             # Kiểm tra checksum
-            if not self.verify_checksum(post, secret_key):
+            if not self.verify_checksum(data, secret_key):
                 return request.make_json_response({"code": "06", "message": "Sai thông tin xác thực"})
             # Lưu giao dịch vào cơ sở dữ liệu Odoo (ví dụ lưu vào một model `payment.transaction`)
             # request.env['payment.transaction'].sudo().create({
@@ -103,7 +104,7 @@ class VNPayController(http.Controller):
             return  request.make_json_response({
                 "code": "03",
                 "message": "Đơn hàng đã được thanh toán",
-                "data": {"txnId": post.get("txnId")}
+                "data": {"txnId": data.get("txnId")}
             })
         except Exception as e:
             return request.make_json_response({"code": "06", "message": "Lỗi hệ thống", "error": str(e)})
