@@ -100,10 +100,11 @@ class VNPayController(http.Controller):
             # })
 
             # Trả về phản hồi thành công
+            _logger.info("thanh toán thành công")
            
             return  request.make_json_response({
-                "code": "03",
-                "message": "Đơn hàng đã được thanh toán",
+                "code": "00",
+                "message": "Đơn hàng thanh toán thành công",
                 "data": {"txnId": data.get("txnId")}
             })
         except Exception as e:
