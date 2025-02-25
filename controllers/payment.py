@@ -82,11 +82,11 @@ class VNPayController(http.Controller):
     def process_payment(self, **post):
         try:
             secret_key = "vnpay@MERCHANT"  # Secret key cần được bảo mật
-            _logger.info(post)
+            _logger.info(post.get("code", "Lỗi"))
 
             # Kiểm tra checksum
             if not self.verify_checksum(post, secret_key):
-                return request.make_json_response({"code": "01", "message": "Checksum không hợp lệ"})
+                return request.make_json_response({"code": "06", "message": "Sai thông tin xác thực"})
             _logger.info(post)
             # Lưu giao dịch vào cơ sở dữ liệu Odoo (ví dụ lưu vào một model `payment.transaction`)
             # request.env['payment.transaction'].sudo().create({
@@ -101,13 +101,13 @@ class VNPayController(http.Controller):
             # Trả về phản hồi thành công
            
             return  request.make_json_response({
-                "code": "00",
-                "message": "Đặt hàng thành công",
+                "code": "03",
+                "message": "Đơn hàng đã được thanh toán",
                 "data": {"txnId": post.get("txnId")}
             })
         except Exception as e:
              
-            return request.make_json_response({"code": "99", "message": "Lỗi hệ thống", "error": str(e)})
+            return request.make_json_response({"code": "06", "message": "Lỗi hệ thống", "error": str(e)})
 
     @http.route(
         "/payment/vnpay/create_invoice",
