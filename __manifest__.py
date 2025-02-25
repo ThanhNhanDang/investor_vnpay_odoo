@@ -16,7 +16,7 @@
     'summary': 'Module này để cho các nhà đầu tư nạp tiền vào với nhà cung cấp VNPay, và thanh toán bằng VNPay',
     'description': '',
     # 'depends': ["base","product", "investor", "payment"],
-    'depends': ["base","product", "payment"],
+    'depends': ["base","product", "payment", "point_of_sale"],
     'installable': True,
     'auto_install': True,
     'application': True,

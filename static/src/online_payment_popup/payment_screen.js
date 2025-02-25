@@ -74,26 +74,6 @@ patch(PaymentScreen.prototype, {
       };
       return response.qr_data;
 
-      //   this.currentOrder.vnpayData = vnpayData;
-      //   paymentLine.set_payment_status("waiting");
-
-      //   const popupCloser = this.dialog.add(OnlinePaymentPopup, vnpayData, {
-      //     onClose: () => {
-      //       paymentLine.set_payment_status(undefined);
-      //     },
-      //   });
-
-      //   const result = await new Promise((resolve) => {
-      //     paymentLine.vnpayResolver = resolve;
-      //   });
-
-      //   if (!result) {
-      //     paymentLine.set_payment_status(undefined);
-      //     return false;
-      //   }
-
-      //   popupCloser();
-      //   paymentLine.set_payment_status("done");
     } catch (error) {
       this.dialog.add(AlertDialog, {
         title: _t("VNPAY QR Payment Error"),
@@ -340,72 +320,4 @@ patch(PaymentScreen.prototype, {
 
     this.afterOrderValidation(true);
   },
-
-  //   async _isOrderValid(isForceValidate) {
-  //     if (!(await super._isOrderValid(...arguments))) {
-  //       return false;
-  //     }
-
-  //     const vnpayLines = this.getRemainingVNPayQRLines();
-  //     if (!vnpayLines.length) {
-  //       return true;
-  //     }
-
-  //     if (this.currentOrder.finalized) {
-  //       return false;
-  //     }
-
-  //     for (const line of vnpayLines) {
-  //       const success = await this._processVNPayQRPayment(line);
-  //       if (!success) {
-  //         return false;
-  //       }
-  //     }
-
-  //     // Verify payment status with server
-  //     const orderStatus = await this.rpc({
-  //       model: "pos.order",
-  //       method: "check_vnpay_payment_status",
-  //       args: [this.currentOrder.uid],
-  //     });
-
-  //     if (orderStatus.is_paid) {
-  //       await this._finalizeVNPayOrder(orderStatus.order_data);
-  //       return false; // Skip normal flow as order is already processed
-  //     }
-
-  //     return true;
-  //   },
-
-  //   async _finalizeVNPayOrder(orderData) {
-  //     if (!orderData) {
-  //       this.dialog.add(AlertDialog, {
-  //         title: _t("Payment Verification Error"),
-  //         body: _t("Could not verify payment status with VNPAY"),
-  //       });
-  //       return;
-  //     }
-
-  //     this.currentOrder.state = "paid";
-  //     this.pos.validated_orders_name_server_id_map[this.currentOrder.name] =
-  //       orderData.id;
-
-  //     if (this.currentOrder.is_to_invoice()) {
-  //       await this._handleInvoicing(orderData);
-  //     }
-
-  //     await this.postPushOrderResolve([orderData.id]);
-  //     this.afterOrderValidation(true);
-  //   },
-
-  //   async _handleInvoicing(orderData) {
-  //     if (!orderData.account_move) {
-  //       this.dialog.add(AlertDialog, {
-  //         title: _t("Invoice Generation Failed"),
-  //         body: _t("Could not generate invoice for VNPAY payment"),
-  //       });
-  //       return;
-  //     }
-  //     await this.invoiceService.downloadPdf(orderData.account_move);
-  //   },
 });
