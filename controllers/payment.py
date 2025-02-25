@@ -86,7 +86,7 @@ class VNPayController(http.Controller):
 
             # Kiểm tra checksum
             if not self.verify_checksum(post, secret_key):
-                return {"code": "01", "message": "Checksum không hợp lệ"}
+                return request.make_json_response({"code": "01", "message": "Checksum không hợp lệ"})
             _logger.info(post)
             # Lưu giao dịch vào cơ sở dữ liệu Odoo (ví dụ lưu vào một model `payment.transaction`)
             # request.env['payment.transaction'].sudo().create({
@@ -99,13 +99,15 @@ class VNPayController(http.Controller):
             # })
 
             # Trả về phản hồi thành công
-            return {
+           
+            return  request.make_json_response({
                 "code": "00",
                 "message": "Đặt hàng thành công",
                 "data": {"txnId": post.get("txnId")}
-            }
+            })
         except Exception as e:
-            return {"code": "99", "message": "Lỗi hệ thống", "error": str(e)}
+             
+            return request.make_json_response({"code": "99", "message": "Lỗi hệ thống", "error": str(e)})
 
     @http.route(
         "/payment/vnpay/create_invoice",
