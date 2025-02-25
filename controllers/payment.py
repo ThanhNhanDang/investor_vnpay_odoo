@@ -78,9 +78,10 @@ class VNPayController(http.Controller):
         generated_checksum = hashlib.md5(raw_string.encode()).hexdigest().upper()
         return generated_checksum == data.get("checksum")
     
-    @http.route('/api/vnpay-ipn/qr', type='http', auth='public', methods=['POST'], csrf=False)
+    @http.route('/api/vnpay-ipn/qr', type='http', auth='public', methods=['POST'], csrf=False,
+        save_session=False)
     def process_payment(self, **post):
-        _logger.info(post)
+        _logger.info("handling redirection from Mollie with data:\n%s", pprint.pformat(post))
         try:
             secret_key = "vnpay@MERCHANT"  # Secret key cần được bảo mật
 
