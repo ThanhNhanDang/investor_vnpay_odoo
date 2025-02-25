@@ -83,6 +83,7 @@ class VNPayController(http.Controller):
         try:
             secret_key = "vnpay@MERCHANT"  # Secret key cần được bảo mật
             _logger.info(post.get("code", "Lỗi"))
+            _logger.info(request.jsonrequest)
 
             # Kiểm tra checksum
             if not self.verify_checksum(post, secret_key):
