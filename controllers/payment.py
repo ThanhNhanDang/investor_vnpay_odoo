@@ -78,18 +78,15 @@ class VNPayController(http.Controller):
         generated_checksum = hashlib.md5(raw_string.encode()).hexdigest().upper()
         return generated_checksum == data.get("checksum")
     
-    @http.route('/api/vnpay-ipn/qr', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/api/vnpay-ipn/qr', type='http', auth='public', methods=['GET'], csrf=False)
     def process_payment(self, **post):
+        _logger.info(post)
         try:
             secret_key = "vnpay@MERCHANT"  # Secret key cần được bảo mật
-            _logger.info(post)
-            _logger.info(post.get("code", "Lỗi"))
-            _logger.info(request.jsonrequest)
 
             # Kiểm tra checksum
             if not self.verify_checksum(post, secret_key):
-                return {"code": "06", "message": "Sai thông tin xác thực"}
-            _logger.info(post)
+                return request.make_json_response({"code": "06", "message": "Sai thông tin xác thực"})
             # Lưu giao dịch vào cơ sở dữ liệu Odoo (ví dụ lưu vào một model `payment.transaction`)
             # request.env['payment.transaction'].sudo().create({
             #     'txn_id': data.get("txnId"),
@@ -102,13 +99,13 @@ class VNPayController(http.Controller):
 
             # Trả về phản hồi thành công
            
-            return  {
+            return  request.make_json_response({
                 "code": "03",
                 "message": "Đơn hàng đã được thanh toán",
                 "data": {"txnId": post.get("txnId")}
-            }
+            })
         except Exception as e:
-            return{"code": "06", "message": "Lỗi hệ thống", "error": str(e)}
+            return request.make_json_response({"code": "06", "message": "Lỗi hệ thống", "error": str(e)})
 
     @http.route(
         "/payment/vnpay/create_invoice",
