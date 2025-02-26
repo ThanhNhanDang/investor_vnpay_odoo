@@ -82,9 +82,13 @@ class VNPayController(http.Controller):
         save_session=False)
     def process_payment(self):
         data = request.get_json_data()
+       
+        if not data:
+            return request.make_json_response({"code": "06", "message": "Dữ liệu đầu vào không hợp lệ"})
+        provider = request.env['payment.provider'].sudo().search([('code', '=', 'vnpay')], limit=1)
+        secret_key = provider.vnpay_secret_key_qr if provider else "vnpay@MERCHANT"
         try:
-            secret_key = "vnpay@MERCHANT"  # Secret key cần được bảo mật
-
+            
             # Kiểm tra checksum
             if not self.verify_checksum(data, secret_key):
                 return request.make_json_response({"code": "06", "message": "Sai thông tin xác thực"})
@@ -100,7 +104,20 @@ class VNPayController(http.Controller):
             # Tạo giao dịch thanh toán
             transaction = self._create_transaction(
                 data.get("amount"), int(data.get("txnId")[0]), data.get("txnId"))
-            _logger.info(transaction.id)
+            if data.get("code") == "00":
+                transaction._set_done()
+            else:
+                transaction._set_error(f"VNPay error: {data.get('message', 'Unknown error')}")
+            # Gửi thông báo qua Bus
+            request.env['bus.bus']._sendone(
+                f"vnpay_payment_{data.get('txnId')}",
+                'payment_update',
+                {
+                    "txnId": data.get("txnId"),
+                    "status": transaction.state,
+                    "message": "Thanh toán " + ("thành công" if data.get("code") == "00" else "thất bại")
+                }
+            )
             # # Xác nhận hóa đơn
             # invoice.action_post()
 
@@ -167,17 +184,20 @@ class VNPayController(http.Controller):
         if not payment_provider:
             _logger.error("Payment provider 'vnpay' not found.")
             raise ValidationError(_("Payment provider VNPay không được cấu hình."))
-
-        transaction_vals = {
-            'amount': float(amount),
-            'partner_id': partner_id,
-            'reference': reference,
-            'payment_method_id': payment_method.id if payment_method else None,
-            'provider_id': payment_provider.id,
-            'currency_id': currency.id if currency else None,
-            'state': 'done',
-        }
-        transaction = transaction_obj.create(transaction_vals)
+        transaction = transaction_obj.search([
+                ('reference', '=',reference),
+            ], limit=1)
+        if not transaction:
+            transaction_vals = {
+                'amount': float(amount),
+                'partner_id': partner_id,
+                'reference': reference,
+                'payment_method_id': payment_method.id if payment_method else None,
+                'provider_id': payment_provider.id,
+                'currency_id': currency.id if currency else None,
+                'state': 'done',
+            }
+            transaction = transaction_obj.create(transaction_vals)
         return transaction
 
     def _mark_invoice_as_paid(self, invoice, transaction):
