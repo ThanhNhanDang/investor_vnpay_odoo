@@ -102,8 +102,9 @@ class VNPayController(http.Controller):
             #     'status': 'pending'
             # })
             # Tạo giao dịch thanh toán
+            referenceSplit = data.get("txnId").split('.')
             transaction = self._create_transaction(
-                data.get("amount"), int(data.get("txnId")[0]), data.get("txnId"))
+                data.get("amount"), int(referenceSplit[1]), data.get("txnId"), int(referenceSplit[0]))
             if data.get("code") == "00":
                 transaction._set_done()
             else:
@@ -170,7 +171,7 @@ class VNPayController(http.Controller):
         invoice = invoice_obj.create(invoice_vals)
         return invoice
 
-    def _create_transaction(self, amount, partner_id, reference):
+    def _create_transaction(self, amount, partner_id, reference, company_id = False):
         """Tạo giao dịch thanh toán với quyền sudo."""
         transaction_obj = request.env['payment.transaction'].sudo()
         payment_method_obj = request.env['payment.method'].sudo()
@@ -196,6 +197,7 @@ class VNPayController(http.Controller):
                 'provider_id': payment_provider.id,
                 'currency_id': currency.id if currency else None,
                 'state': 'done',
+                "company_id":company_id
             }
             transaction = transaction_obj.create(transaction_vals)
         return transaction
