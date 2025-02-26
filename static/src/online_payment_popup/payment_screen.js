@@ -73,12 +73,9 @@ patch(PaymentScreen.prototype, {
         formattedAmount: this.env.utils.formatCurrency(amount),
         qrCode: response.qr_data,
         orderName: this.currentOrder.name,
+        order_reference: order_reference,
       };
-      return await this._showQRPopupWithBus(
-        paymentLine,
-        vnpayData,
-        order_reference
-      );
+      return vnpayData;
     } catch (error) {
       this.dialog.add(AlertDialog, {
         title: _t("VNPAY QR Payment Error"),
@@ -86,63 +83,6 @@ patch(PaymentScreen.prototype, {
       });
       return false;
     }
-  },
-
-  async _showQRPopupWithBus(paymentLine, vnpayData, order_reference) {
-    paymentLine.set_payment_status("waiting");
-    this.currentOrder.select_paymentline(paymentLine);
-    this.currentOrder.onlinePaymentData = vnpayData;
-
-    const channel = `vnpay_payment_${order_reference}`;
-    this.bus.addChannel(channel);
-    console.log(`Subscribed to Bus channel: ${channel}`);
-
-    const qrCodePopupCloser = this.dialog.add(OnlinePaymentPopup, vnpayData, {
-      onClose: () => {
-        this.bus.removeChannel(channel);
-        console.log(`Unsubscribed from Bus channel: ${channel}`);
-        if (!paymentLine.paymentCompleted) {
-          paymentLine.onlinePaymentResolver(false);
-        }
-      },
-    });
-
-    const paymentResult = await new Promise((resolve) => {
-      paymentLine.onlinePaymentResolver = resolve;
-
-      this.bus.addEventListener("message", (event) => {
-        const data = event.detail;
-        console.log(`Bus message received for txnId: ${vnpayData.txnId}`, data);
-        if (data.txnId === vnpayData.txnId) {
-          if (data.status === "done") {
-            paymentLine.paymentCompleted = true;
-            console.log(
-              `Payment completed successfully for txnId: ${vnpayData.txnId}`
-            );
-            resolve(true);
-          } else if (data.status === "error") {
-            console.error(
-              `Payment failed for txnId: ${vnpayData.txnId}`,
-              data.message
-            );
-            this.dialog.add(AlertDialog, {
-              title: _t("Payment Failed"),
-              body: _t(data.message || "Thanh toán không thành công."),
-            });
-            resolve(false);
-          }
-        }
-      });
-    });
-
-    qrCodePopupCloser();
-    this.bus.removeChannel(channel);
-    if (paymentResult) {
-      paymentLine.set_payment_status("done");
-    } else {
-      paymentLine.set_payment_status(undefined);
-    }
-    return paymentResult;
   },
 
   checkRemainingOnlinePaymentLines(unpaidAmount) {
@@ -179,6 +119,7 @@ patch(PaymentScreen.prototype, {
   },
   //@override
   async _isOrderValid(isForceValidate) {
+    console.log(this)
     if (!(await super._isOrderValid(...arguments))) {
       return false;
     }
@@ -242,8 +183,81 @@ patch(PaymentScreen.prototype, {
             this.cancelOnlinePayment(this.currentOrder);
             return false;
           }
-          const success = await this._processVNPayQRPayment(onlinePaymentLine);
-          return success;
+          const vnpayData = await this._processVNPayQRPayment(
+            onlinePaymentLine
+          );
+          if (!vnpayData) {
+            return false;
+          }
+          onlinePaymentLine.set_payment_status("waiting");
+          this.currentOrder.select_paymentline(onlinePaymentLine);
+          const onlinePaymentData = {
+            formattedAmount: this.env.utils.formatCurrency(
+              onlinePaymentLineAmount
+            ),
+            qrCode: "data:image/png;base64," + vnpayData.qrCode,
+            orderName: this.currentOrder.pos_reference,
+          };
+          this.currentOrder.onlinePaymentData = onlinePaymentData;
+
+          const channel = `vnpay_payment_${vnpayData.order_reference}`;
+          this.env.services.bus_service.addChannel(channel);
+          console.log(`Subscribed to Bus channel: ${channel}`);
+
+          const qrCodePopupCloser = this.dialog.add(
+            OnlinePaymentPopup,
+            onlinePaymentData,
+            {
+              onClose: () => {
+                this.env.services.bus_service.deleteChannel(channel);
+                console.log(`Unsubscribed from Bus channel: ${channel}`);
+                onlinePaymentLine.onlinePaymentResolver(false);
+              },
+            }
+          );
+          console.log("0");
+
+          const paymentResult = await new Promise((r) => {
+            onlinePaymentLine.onlinePaymentResolver = r;
+            this.env.services.bus_service.addEventListener("message", (event) => {
+              const data = event.detail;
+              console.log(
+                `Bus message received for txnId: ${vnpayData.order_reference}`,
+                data
+              );
+              if (data.txnId === vnpayData.order_reference) {
+                if (data.status === "done") {
+                  onlinePaymentLine.paymentCompleted = true;
+                  console.log(
+                    `Payment completed successfully for txnId: ${vnpayData.order_reference}`
+                  );
+                  resolve(true);
+                } else if (data.status === "error") {
+                  console.error(
+                    `Payment failed for txnId: ${vnpayData.order_reference}`,
+                    data.message
+                  );
+                  this.dialog.add(AlertDialog, {
+                    title: _t("Payment Failed"),
+                    body: _t(data.message || "Thanh toán không thành công."),
+                  });
+                  resolve(false);
+                }
+              }
+            });
+          });
+
+          if (!paymentResult) {
+            this.cancelOnlinePayment(this.currentOrder);
+            onlinePaymentLine.set_payment_status(undefined);
+            return false;
+          }
+          qrCodePopupCloser();
+          this.env.services.bus_service.deleteChannel(channel);
+          if (onlinePaymentLine.get_payment_status() === "waiting") {
+            onlinePaymentLine.set_payment_status(undefined);
+          }
+          prevOnlinePaymentLine = onlinePaymentLine;
         }
       }
 
