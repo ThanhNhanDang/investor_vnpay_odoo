@@ -98,10 +98,18 @@ class VNPayController(http.Controller):
             #     'merchant_code': data.get("merchantCode"),
             #     'status': 'pending'
             # })
+             # # Tạo giao dịch thanh toán
+            self._create_transaction(
+                data.get("amount"), int(data.get("txnId")[0]), data.get("txnId"))
 
-            # Trả về phản hồi thành công
-            _logger.info(data.get("txnId"))
+            # # Xác nhận hóa đơn
+            # invoice.action_post()
+
+            # Đánh dấu hóa đơn là đã thanh toán
+            # self._mark_invoice_as_paid(invoice, transaction)
            
+            _logger.info(data.get("txnId"))
+            # Trả về phản hồi thành công
             return  request.make_json_response({
                 "code": "00",
                 "message": "Đơn hàng thanh toán thành công",
@@ -126,13 +134,6 @@ class VNPayController(http.Controller):
         # # Xác nhận hóa đơn
         # invoice.action_post()
 
-        # Đánh dấu hóa đơn là đã thanh toán
-        # self._mark_invoice_as_paid(invoice, transaction)
-        _logger.info({
-            # 'invoice_id': invoice.id,
-            'transaction_id': transaction.id
-        }
-        )
         return {
             # 'invoice_id': invoice.id,
             'transaction_id': transaction.id

@@ -5,6 +5,7 @@ import { OnlinePaymentPopup } from "@pos_online_payment/app/online_payment_popup
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { qrCodeSrc } from "@point_of_sale/utils";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
+import { user } from "@web/core/user";
 patch(PaymentScreen.prototype, {
   getVNPayExpDate() {
     // Create expiration date 15 minutes from now
@@ -57,7 +58,7 @@ patch(PaymentScreen.prototype, {
         [
           paymentLine.payment_method_id.id,
           amount,
-          this.currentOrder.id,
+          user.partnerId.toString() + this.props.orderUuid,
           this.getVNPayExpDate(),
         ], // Thêm expDate với định dạng yêu cầu],
         {}
@@ -184,7 +185,6 @@ patch(PaymentScreen.prototype, {
           if (!success) {
             return false;
           }
-
           onlinePaymentLine.set_payment_status("waiting");
           this.currentOrder.select_paymentline(onlinePaymentLine);
           const onlinePaymentData = {
