@@ -50,11 +50,6 @@ patch(PaymentScreen.prototype, {
 
   async _processVNPayQRPayment(paymentLine) {
     const amount = paymentLine.get_amount();
-    // Test kết nối WebSocket trước khi tạo QR
-    const wsConnected = await this.testWebSocketConnection();
-    if (!wsConnected) {
-      throw new Error("Không thể kết nối tới WebSocket server.");
-    }
     try {
       const response = await this.env.services.orm.call(
         "payment.provider",
@@ -78,6 +73,7 @@ patch(PaymentScreen.prototype, {
         orderName: this.currentOrder.name,
       };
       return response.qr_data;
+
     } catch (error) {
       this.dialog.add(AlertDialog, {
         title: _t("VNPAY QR Payment Error"),
@@ -208,13 +204,13 @@ patch(PaymentScreen.prototype, {
               },
             }
           );
-          console.log("0");
+      console.log("0")
 
           const paymentResult = await new Promise(
             (r) => (onlinePaymentLine.onlinePaymentResolver = r)
           );
-          console.log("1");
-          console.log(paymentResult);
+      console.log("1")
+      console.log(paymentResult)
 
           if (!paymentResult) {
             this.cancelOnlinePayment(this.currentOrder);
@@ -239,7 +235,7 @@ patch(PaymentScreen.prototype, {
       if (!lastOrderServerOPData || !lastOrderServerOPData.is_paid) {
         return false;
       }
-      console.log("hell0");
+      console.log("hell0")
       await this.afterPaidOrderSavedOnServer(lastOrderServerOPData.paid_order);
       return false; // Cancel normal flow because the current order is already saved on the server.
     } else if (typeof this.currentOrder.id === "number") {
@@ -329,31 +325,4 @@ patch(PaymentScreen.prototype, {
     this.afterOrderValidation(true);
   },
 
-  // Hàm test kết nối WebSocket
-  async testWebSocketConnection() {
-    return new Promise((resolve) => {
-      const websocket = new WebSocket("ws://your-odoo-domain:8765"); // Thay bằng domain/port thực tế
-      console.log("Testing WebSocket connection...");
-
-      websocket.onopen = () => {
-        console.log("WebSocket connection test successful!");
-        websocket.close();
-        resolve(true);
-      };
-
-      websocket.onerror = (error) => {
-        console.error("WebSocket connection test failed:", error);
-        resolve(false);
-      };
-
-      // Timeout sau 5 giây nếu không kết nối được
-      setTimeout(() => {
-        if (websocket.readyState !== WebSocket.OPEN) {
-          console.error("WebSocket connection test timed out.");
-          websocket.close();
-          resolve(false);
-        }
-      }, 5000);
-    });
-  },
 });
