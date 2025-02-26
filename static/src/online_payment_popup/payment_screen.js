@@ -219,7 +219,7 @@ patch(PaymentScreen.prototype, {
 
           const paymentResult = await new Promise((r) => {
             onlinePaymentLine.onlinePaymentResolver = r;
-            this.env.bus.addEventListener("message", (event) => {
+            this.env.services.bus_service.addEventListener("payment_update", (event) => {
               const data = event.detail;
               console.log(
                 `Bus message received for txnId: ${vnpayData.order_reference}`,
