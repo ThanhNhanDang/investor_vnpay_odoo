@@ -261,6 +261,7 @@ patch(PaymentScreen.prototype, {
             onlinePaymentLine.set_payment_status(undefined);
           }
           prevOnlinePaymentLine = onlinePaymentLine;
+          return true;
         }
       }
 
