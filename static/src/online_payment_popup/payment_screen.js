@@ -225,32 +225,39 @@ patch(PaymentScreen.prototype, {
           const paymentResult = await new Promise((r) => {
             onlinePaymentLine.onlinePaymentResolver = r;
             this.env.services.bus_service.addEventListener(
-              "payment_update",
+              "notification",
               (event) => {
-                const data = event.detail;
-                console.log(
-                  `Bus message received for txnId: ${vnpayData.order_reference}`,
-                  data
+                const data = event.detail.filter(
+                  (item) => item.payload.channel === channel
                 );
-                if (data.txnId === vnpayData.order_reference) {
-                  if (data.status === "done") {
-                    onlinePaymentLine.paymentCompleted = true;
-                    console.log(
-                      `Payment completed successfully for txnId: ${vnpayData.order_reference}`
-                    );
-                    resolve(true);
-                  } else if (data.status === "error") {
-                    console.error(
-                      `Payment failed for txnId: ${vnpayData.order_reference}`,
-                      data.message
-                    );
-                    this.dialog.add(AlertDialog, {
-                      title: _t("Payment Failed"),
-                      body: _t(data.message || "Thanh toán không thành công."),
-                    });
-                    resolve(false);
+                data.forEach((item) => {
+                  const data = item.payload.data;
+                  console.log(
+                    `Bus message received for txnId: ${vnpayData.order_reference}`,
+                    data
+                  );
+                  if (data.txnId === vnpayData.order_reference) {
+                    if (data.status === "done") {
+                      onlinePaymentLine.paymentCompleted = true;
+                      console.log(
+                        `Payment completed successfully for txnId: ${vnpayData.order_reference}`
+                      );
+                      resolve(true);
+                    } else if (data.status === "error") {
+                      console.error(
+                        `Payment failed for txnId: ${vnpayData.order_reference}`,
+                        data.message
+                      );
+                      this.dialog.add(AlertDialog, {
+                        title: _t("Payment Failed"),
+                        body: _t(
+                          data.message || "Thanh toán không thành công."
+                        ),
+                      });
+                      resolve(false);
+                    }
                   }
-                }
+                });
               }
             );
           });
