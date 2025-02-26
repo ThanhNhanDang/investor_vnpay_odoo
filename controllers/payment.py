@@ -97,10 +97,10 @@ class VNPayController(http.Controller):
             #     'merchant_code': data.get("merchantCode"),
             #     'status': 'pending'
             # })
-             # # Tạo giao dịch thanh toán
-            self._create_transaction(
+            # Tạo giao dịch thanh toán
+            transaction = self._create_transaction(
                 data.get("amount"), int(data.get("txnId")[0]), data.get("txnId"))
-
+            _logger.info(transaction.id)
             # # Xác nhận hóa đơn
             # invoice.action_post()
 
