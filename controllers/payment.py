@@ -82,7 +82,6 @@ class VNPayController(http.Controller):
         save_session=False)
     def process_payment(self):
         data = request.get_json_data()
-        _logger.info("DATA:\n%s", request.get_json_data())
         try:
             secret_key = "vnpay@MERCHANT"  # Secret key cần được bảo mật
 
@@ -108,7 +107,6 @@ class VNPayController(http.Controller):
             # Đánh dấu hóa đơn là đã thanh toán
             # self._mark_invoice_as_paid(invoice, transaction)
            
-            _logger.info(data.get("txnId"))
             # Trả về phản hồi thành công
             return  request.make_json_response({
                 "code": "00",
@@ -156,21 +154,27 @@ class VNPayController(http.Controller):
         return invoice
 
     def _create_transaction(self, amount, partner_id, reference):
-        transaction_obj = request.env['payment.transaction']
-        payment_method_obj = request.env['payment.method']
-        payment_provider_obj = request.env['payment.provider']
-        currency_obj = request.env['res.currency']
-        payment_method = payment_method_obj.search([("code","=","vnpay")])
-        payment_provider =  payment_provider_obj.search([("code","=","vnpay")])
-        currency =  currency_obj.search([("name","=","VND")])
-        _logger.info(payment_provider)
+        """Tạo giao dịch thanh toán với quyền sudo."""
+        transaction_obj = request.env['payment.transaction'].sudo()
+        payment_method_obj = request.env['payment.method'].sudo()
+        payment_provider_obj = request.env['payment.provider'].sudo()
+        currency_obj = request.env['res.currency'].sudo()
+
+        payment_method = payment_method_obj.search([("code", "=", "vnpay")], limit=1)
+        payment_provider = payment_provider_obj.search([("code", "=", "vnpay")], limit=1)
+        currency = currency_obj.search([("name", "=", "VND")], limit=1)
+
+        if not payment_provider:
+            _logger.error("Payment provider 'vnpay' not found.")
+            raise ValidationError(_("Payment provider VNPay không được cấu hình."))
+
         transaction_vals = {
-            'amount': amount,
+            'amount': float(amount),
             'partner_id': partner_id,
             'reference': reference,
-            'payment_method_id': payment_method.id,
+            'payment_method_id': payment_method.id if payment_method else None,
             'provider_id': payment_provider.id,
-            'currency_id': currency.id,
+            'currency_id': currency.id if currency else None,
             'state': 'done',
         }
         transaction = transaction_obj.create(transaction_vals)
