@@ -124,7 +124,6 @@ patch(PaymentScreen.prototype, {
   },
   //@override
   async _isOrderValid(isForceValidate) {
-    console.log(this);
     if (!(await super._isOrderValid(...arguments))) {
       return false;
     }
@@ -207,7 +206,6 @@ patch(PaymentScreen.prototype, {
 
           const channel = `vnpay_payment_${vnpayData.order_reference}`;
           this.env.services.bus_service.addChannel(channel);
-          console.log(`Subscribed to Bus channel: ${channel}`);
 
           const qrCodePopupCloser = this.dialog.add(
             OnlinePaymentPopup,
@@ -215,12 +213,10 @@ patch(PaymentScreen.prototype, {
             {
               onClose: () => {
                 this.env.services.bus_service.deleteChannel(channel);
-                console.log(`Unsubscribed from Bus channel: ${channel}`);
                 onlinePaymentLine.onlinePaymentResolver(false);
               },
             }
           );
-          console.log("0");
 
           const paymentResult = await new Promise((resolve) => {
             onlinePaymentLine.onlinePaymentResolver = resolve;
@@ -230,9 +226,7 @@ patch(PaymentScreen.prototype, {
                 if (event.data.txnId === vnpayData.order_reference) {
                   if (event.data.status === "done") {
                     onlinePaymentLine.paymentCompleted = true;
-                    console.log(
-                      `Payment completed successfully for txnId: ${vnpayData.order_reference}`
-                    );
+                    
                     resolve(true);
                   } else if (data.status === "error") {
                     console.error(
@@ -261,7 +255,6 @@ patch(PaymentScreen.prototype, {
             onlinePaymentLine.set_payment_status(undefined);
           }
           prevOnlinePaymentLine = onlinePaymentLine;
-          return true;
         }
       }
 
@@ -272,10 +265,12 @@ patch(PaymentScreen.prototype, {
             0
           );
       }
+      console.log(1)
       if (!lastOrderServerOPData || !lastOrderServerOPData.is_paid) {
         return false;
       }
-      console.log("hell0");
+      console.log(2)
+
       await this.afterPaidOrderSavedOnServer(lastOrderServerOPData.paid_order);
       return false; // Cancel normal flow because the current order is already saved on the server.
     } else if (typeof this.currentOrder.id === "number") {
@@ -305,7 +300,6 @@ patch(PaymentScreen.prototype, {
         return false;
       }
     }
-
     return true;
   },
   cancelOnlinePayment(order) {
@@ -320,6 +314,7 @@ patch(PaymentScreen.prototype, {
       });
       return;
     }
+    console.log(3)
 
     // Update the local order with the data from the server, because it's the server
     // that is responsible for saving the final state of an order when there is an
@@ -330,12 +325,14 @@ patch(PaymentScreen.prototype, {
     // be invalid.
     const isInvoiceRequested = this.currentOrder.is_to_invoice();
     if (!orderJSON[0] || this.currentOrder.id !== orderJSON[0].id) {
+      
       this.dialog.add(AlertDialog, {
         title: _t("Order saving issue"),
         body: _t("The order has not been saved correctly on the server."),
       });
       return;
     }
+
     this.currentOrder.state = "paid";
     this.pos.validated_orders_name_server_id_map[this.currentOrder.name] =
       this.currentOrder.id;
@@ -361,6 +358,7 @@ patch(PaymentScreen.prototype, {
     }
 
     await this.postPushOrderResolve([this.currentOrder.server_id]);
+    console.log(4)
 
     this.afterOrderValidation(true);
   },
