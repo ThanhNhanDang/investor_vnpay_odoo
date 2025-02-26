@@ -100,7 +100,7 @@ class VNPayController(http.Controller):
             # })
 
             # Trả về phản hồi thành công
-            _logger.info("thanh toán thành công")
+            _logger.info(data.get("txnId"))
            
             return  request.make_json_response({
                 "code": "00",

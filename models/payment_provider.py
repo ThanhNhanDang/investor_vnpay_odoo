@@ -221,6 +221,7 @@ class PaymentProviderVNPay(models.Model):
         return hashlib.md5(checksum_string.encode('utf-8')).hexdigest().upper()
 
     def vnpay_generate_qr(self, amount, reference,expDate):
+        _logger.info(reference)
         provider = self.sudo().search([('code', '=', 'vnpay')], limit=1)
         request_data = {
             "appId": provider.vnpay_appID_qr,
