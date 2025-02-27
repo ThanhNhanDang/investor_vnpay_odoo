@@ -52,7 +52,6 @@ patch(PaymentScreen.prototype, {
   async _processVNPayQRPayment(paymentLine) {
     const amount = paymentLine.get_amount();
     const expDate = this.getVNPayExpDate();
-    console.log(expDate)
     const order_reference =
       this.env.services.company.currentCompany.id.toString() +
       "." +
@@ -270,6 +269,7 @@ patch(PaymentScreen.prototype, {
             this.currentOrder,
             0
           );
+        console.log(3);
       }
       console.log(1);
       if (!lastOrderServerOPData || !lastOrderServerOPData.is_paid) {
