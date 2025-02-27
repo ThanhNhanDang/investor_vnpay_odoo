@@ -300,7 +300,7 @@ class PaymentProviderVNPay(models.Model):
                 "payTxnId":payment_transaction.reference,
                 "refundTxnId":reference,
                 "typeRefund":"2",
-                "amount": str((int(amount)*-1)),
+                "amount": (int(amount)*-1),
                 "refundContent":"Hoàn tiền",
                 "payDate":expDateFull,
                 "checkSum":self.refund_calculate_md5_hash(
