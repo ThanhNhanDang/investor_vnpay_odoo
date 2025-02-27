@@ -310,11 +310,13 @@ class PaymentProviderVNPay(models.Model):
                     payment_transaction.reference,
                     reference,
                     "2",
-                    str((int(amount)*-1)),
+                    (int(amount)*-1),
                     expDateFull
                 )
             }
             try:
+                _logger.info(request_data)
+                
                 response = requests.post(
                     provider.vnpay_api_url_refund,
                     json=request_data,
