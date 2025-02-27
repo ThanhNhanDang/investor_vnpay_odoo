@@ -244,10 +244,11 @@ class PaymentProviderVNPay(models.Model):
         input_string = (
             f"{secret_key}{merchant_code}{qr_trace}{pay_txn_id}{refund_txn_id}{type_refund}{amount}{pay_date}"
         )
-        _logger.info(input_string)
         
         # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
         md5_hash = hashlib.md5(input_string.encode('utf-8')).hexdigest().upper()
+        _logger.info(md5_hash)
+        
         return md5_hash
     
     def _get_error_message(self, code, message):
