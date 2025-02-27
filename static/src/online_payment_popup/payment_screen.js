@@ -52,12 +52,9 @@ patch(PaymentScreen.prototype, {
   async _processVNPayQRPayment(paymentLine) {
     const amount = paymentLine.get_amount();
     const expDate = this.getVNPayExpDate();
-    const order_reference =
-      this.env.services.company.currentCompany.id.toString() +
-      "." +
-      user.partnerId.toString() +
-      "." +
-      this.props.orderUuid;
+    const order_reference = `${user.partnerId.toString()}.${this.env.services.company.currentCompany.id.toString()}.${
+      this.currentOrder.id
+    }.${this.props.orderUuid}`;
     try {
       const response = await this.env.services.orm.call(
         "payment.provider",
@@ -93,7 +90,7 @@ patch(PaymentScreen.prototype, {
     const minutes = expDateString.slice(8, 10);
     return `${hours} giờ:${minutes} phút`;
   },
- 
+
   //@override
   async _isOrderValid(isForceValidate) {
     if (!(await super._isOrderValid(...arguments))) {
@@ -191,7 +188,7 @@ patch(PaymentScreen.prototype, {
               },
             }
           );
-          console.log(onlinePaymentLine)
+          console.log(onlinePaymentLine);
 
           const paymentResult = await new Promise((resolve) => {
             onlinePaymentLine.onlinePaymentResolver = resolve;
@@ -242,7 +239,7 @@ patch(PaymentScreen.prototype, {
         console.log(3);
       }
       console.log(1);
-      console.log(lastOrderServerOPData)
+      console.log(lastOrderServerOPData);
       if (!lastOrderServerOPData || !lastOrderServerOPData.is_paid) {
         return false;
       }
