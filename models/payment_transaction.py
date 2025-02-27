@@ -11,5 +11,5 @@ _logger = logging.getLogger(__name__)
 class PaymentTransactionVNPay(models.Model):
     _inherit = "payment.transaction"
     qrTrace = fields.Char(
-        string="VNPay Website Code (TmnCode)", required_if_provider="vnpay"
+        string="VNPay Website Code (TmnCode)"
     )
