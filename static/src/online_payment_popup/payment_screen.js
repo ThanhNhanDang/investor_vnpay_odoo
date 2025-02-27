@@ -93,38 +93,7 @@ patch(PaymentScreen.prototype, {
     const minutes = expDateString.slice(8, 10);
     return `${hours} giờ:${minutes} phút`;
   },
-  checkRemainingOnlinePaymentLines(unpaidAmount) {
-    const remainingLines = this.getRemainingOnlinePaymentLines();
-    let remainingAmount = 0;
-    let amount = 0;
-    for (const line of remainingLines) {
-      amount = line.get_amount();
-      if (amount <= 0) {
-        this.dialog.add(AlertDialog, {
-          title: _t("Invalid online payment"),
-          body: _t(
-            "Online payments cannot have a negative amount (%s: %s).",
-            line.payment_method_id.name,
-            this.env.utils.formatCurrency(amount)
-          ),
-        });
-        return false;
-      }
-      remainingAmount += amount;
-    }
-    if (!this.env.utils.floatIsZero(unpaidAmount - remainingAmount)) {
-      this.dialog.add(AlertDialog, {
-        title: _t("Invalid online payments"),
-        body: _t(
-          "The total amount of remaining online payments to execute (%s) doesn't correspond to the remaining unpaid amount of the order (%s).",
-          this.env.utils.formatCurrency(remainingAmount),
-          this.env.utils.formatCurrency(unpaidAmount)
-        ),
-      });
-      return false;
-    }
-    return true;
-  },
+ 
   //@override
   async _isOrderValid(isForceValidate) {
     if (!(await super._isOrderValid(...arguments))) {
@@ -222,6 +191,7 @@ patch(PaymentScreen.prototype, {
               },
             }
           );
+          console.log(onlinePaymentLine)
 
           const paymentResult = await new Promise((resolve) => {
             onlinePaymentLine.onlinePaymentResolver = resolve;
@@ -231,7 +201,7 @@ patch(PaymentScreen.prototype, {
                 if (event.data.txnId === vnpayData.order_reference) {
                   if (event.data.status === "done") {
                     onlinePaymentLine.paymentCompleted = true;
-
+                    onlinePaymentLine.set_payment_status("done");
                     resolve(true);
                   } else if (data.status === "error") {
                     console.error(
@@ -321,7 +291,6 @@ patch(PaymentScreen.prototype, {
       });
       return;
     }
-    console.log(3);
 
     // Update the local order with the data from the server, because it's the server
     // that is responsible for saving the final state of an order when there is an
@@ -375,7 +344,6 @@ patch(PaymentScreen.prototype, {
     let amount = 0;
     for (const line of remainingLines) {
       amount = line.get_amount();
-
       remainingAmount += amount;
     }
     if (!this.env.utils.floatIsZero(unpaidAmount - remainingAmount)) {
