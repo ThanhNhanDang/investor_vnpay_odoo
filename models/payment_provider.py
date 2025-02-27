@@ -247,7 +247,7 @@ class PaymentProviderVNPay(models.Model):
         _logger.info(input_string)
         
         # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
-        md5_hash = hashlib.md5(input_string.encode('utf-8')).hexdigest()
+        md5_hash = hashlib.md5(input_string.encode('utf-8')).hexdigest().upper()
         return md5_hash
     
     def _get_error_message(self, code, message):
