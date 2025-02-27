@@ -10,7 +10,7 @@ patch(PaymentScreen.prototype, {
   getVNPayExpDate() {
     // Create expiration date 15 minutes from now
     const now = new Date();
-    now.setMinutes(now.getMinutes() + 15);
+    now.setMinutes(now.getMinutes() + 16);
 
     const year = now.getFullYear().toString().slice(-2);
     const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -51,6 +51,8 @@ patch(PaymentScreen.prototype, {
 
   async _processVNPayQRPayment(paymentLine) {
     const amount = paymentLine.get_amount();
+    const expDate = this.getVNPayExpDate();
+    console.log(expDate)
     const order_reference =
       this.env.services.company.currentCompany.id.toString() +
       "." +
@@ -61,12 +63,7 @@ patch(PaymentScreen.prototype, {
       const response = await this.env.services.orm.call(
         "payment.provider",
         "vnpay_generate_qr",
-        [
-          paymentLine.payment_method_id.id,
-          amount,
-          order_reference,
-          this.getVNPayExpDate(),
-        ], // Thêm expDate với định dạng yêu cầu],
+        [paymentLine.payment_method_id.id, amount, order_reference, expDate], // Thêm expDate với định dạng yêu cầu],
         {}
       );
 
@@ -79,6 +76,8 @@ patch(PaymentScreen.prototype, {
         qrCode: response.qr_data,
         orderName: this.currentOrder.name,
         order_reference: order_reference,
+        expDate: expDate,
+        displayExpTime: this.formatDisplayTime(expDate),
       };
       return vnpayData;
     } catch (error) {
@@ -89,7 +88,12 @@ patch(PaymentScreen.prototype, {
       return false;
     }
   },
-
+  formatDisplayTime(expDateString) {
+    // Convert yyMMddHHmm to display format
+    const hours = expDateString.slice(6, 8);
+    const minutes = expDateString.slice(8, 10);
+    return `${hours} giờ:${minutes} phút`;
+  },
   checkRemainingOnlinePaymentLines(unpaidAmount) {
     const remainingLines = this.getRemainingOnlinePaymentLines();
     let remainingAmount = 0;
@@ -201,6 +205,8 @@ patch(PaymentScreen.prototype, {
             ),
             qrCode: "data:image/png;base64," + vnpayData.qrCode,
             orderName: this.currentOrder.pos_reference,
+            displayExpTime: vnpayData.displayExpTime,
+            expDate: vnpayData.expDate,
           };
           this.currentOrder.onlinePaymentData = onlinePaymentData;
 
@@ -226,7 +232,7 @@ patch(PaymentScreen.prototype, {
                 if (event.data.txnId === vnpayData.order_reference) {
                   if (event.data.status === "done") {
                     onlinePaymentLine.paymentCompleted = true;
-                    
+
                     resolve(true);
                   } else if (data.status === "error") {
                     console.error(
@@ -265,11 +271,11 @@ patch(PaymentScreen.prototype, {
             0
           );
       }
-      console.log(1)
+      console.log(1);
       if (!lastOrderServerOPData || !lastOrderServerOPData.is_paid) {
         return false;
       }
-      console.log(2)
+      console.log(2);
 
       await this.afterPaidOrderSavedOnServer(lastOrderServerOPData.paid_order);
       return false; // Cancel normal flow because the current order is already saved on the server.
@@ -314,7 +320,7 @@ patch(PaymentScreen.prototype, {
       });
       return;
     }
-    console.log(3)
+    console.log(3);
 
     // Update the local order with the data from the server, because it's the server
     // that is responsible for saving the final state of an order when there is an
@@ -325,7 +331,6 @@ patch(PaymentScreen.prototype, {
     // be invalid.
     const isInvoiceRequested = this.currentOrder.is_to_invoice();
     if (!orderJSON[0] || this.currentOrder.id !== orderJSON[0].id) {
-      
       this.dialog.add(AlertDialog, {
         title: _t("Order saving issue"),
         body: _t("The order has not been saved correctly on the server."),
@@ -358,8 +363,31 @@ patch(PaymentScreen.prototype, {
     }
 
     await this.postPushOrderResolve([this.currentOrder.server_id]);
-    console.log(4)
+    console.log(4);
 
     this.afterOrderValidation(true);
+  },
+
+  checkRemainingOnlinePaymentLines(unpaidAmount) {
+    const remainingLines = this.getRemainingOnlinePaymentLines();
+    let remainingAmount = 0;
+    let amount = 0;
+    for (const line of remainingLines) {
+      amount = line.get_amount();
+
+      remainingAmount += amount;
+    }
+    if (!this.env.utils.floatIsZero(unpaidAmount - remainingAmount)) {
+      this.dialog.add(AlertDialog, {
+        title: _t("Invalid online payments"),
+        body: _t(
+          "The total amount of remaining online payments to execute (%s) doesn't correspond to the remaining unpaid amount of the order (%s).",
+          this.env.utils.formatCurrency(remainingAmount),
+          this.env.utils.formatCurrency(unpaidAmount)
+        ),
+      });
+      return false;
+    }
+    return true;
   },
 });
