@@ -289,8 +289,8 @@ class PaymentProviderVNPay(models.Model):
             request_data = {
                 "merchantCode": provider.vnpay_merchant_code,
                 "qrTrace": payment_transaction.qrTrace,
-                "payTxnId":reference,
-                "refundTxnId":payment_transaction.reference,
+                "payTxnId":payment_transaction.reference,
+                "refundTxnId":reference,
                 "typeRefund":"2",
                 "amount": str((int(amount)*-1)),
                 "refundContent":"Hoàn tiền",
@@ -299,8 +299,8 @@ class PaymentProviderVNPay(models.Model):
                     provider.vnpay_secret_key_refund,
                     provider.vnpay_merchant_code,
                     payment_transaction.qrTrace,
-                    reference,
                     payment_transaction.reference,
+                    reference,
                     "2",
                     str((int(amount)*-1)),
                     expDateFull

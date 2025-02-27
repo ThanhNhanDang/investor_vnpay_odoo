@@ -274,10 +274,10 @@ class VNPayController(http.Controller):
                 response_data = response.json()
                 return response_data
             else:
-                return _("Failed to check invoice. HTTP Status Code: %s", response.status_code)
+                return _("Failed to check invoice. HTTP Status Code: "+ response.status_code)
 
         except Exception as e:
-            return _("Error while checking invoice: %s", str(e))
+            return _("Error while checking invoice: "+ str(e))
         
         
     @http.route(
@@ -296,25 +296,10 @@ class VNPayController(http.Controller):
         :param pos_order_id: ID của đơn hàng POS
         :return: Kết quả kiểm tra hóa đơn
         """
-        # Lấy thông tin provider VNPay
-        provider = request.env["payment.provider"].sudo().search([('code', '=', 'vnpay')], limit=1)
-        if not provider:
-            return _("VNPay payment provider is not configured.")
-
-        # Lấy thông tin đơn hàng POS
-        pos_order = request.env["pos.order"].browse(kw['pos_order_id'])
-        if not pos_order:
-            return _("POS Order not found.")
-
-        # Các tham số cần thiết
-        merchant_code = provider.vnpay_merchant_code
-        terminal_id = provider.vnpay_terminal_id
-        pay_date = pos_order.date_order.strftime("%d/%m/%Y")  # Định dạng ngày
-        secret_key = provider.vnpay_secret_key_qr
 
         # Gọi hàm kiểm tra hóa đơn
-        result = self.vnpay_check_invoice(kw['txn_id'], merchant_code, terminal_id, pay_date, secret_key)
-
+        result = self.vnpay_check_invoice("7be390b5e-f6ad-4758-9831-d5fab22d0750", "0317155027ABC", "T4TEKQRR", "26/02/2025", "vnpay@123@langhaHangLa")
+        _logger.info(result)
         return result
     
     @staticmethod
