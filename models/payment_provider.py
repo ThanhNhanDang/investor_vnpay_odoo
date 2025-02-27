@@ -276,6 +276,8 @@ class PaymentProviderVNPay(models.Model):
             _logger.info(pos_order.refunded_order_id.id)
             payment_transaction=self.env["payment.transaction"].search([("pos_order_id", "=", pos_order.refunded_order_id.id)], limit=1)
             _logger.info(payment_transaction.provider_id.code)
+            _logger.info(payment_transaction.provider_id)
+            _logger.info(payment_transaction)
             if payment_transaction.provider_id.code != "vnpay":
                 return {
                 'success': False,
