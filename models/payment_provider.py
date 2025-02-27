@@ -311,6 +311,7 @@ class PaymentProviderVNPay(models.Model):
                     headers={"Content-Type": "text/plain"}
                 )
                 response_data = response.json()
+                _logger.info(response_data)
                 # Kiểm tra mã trạng thái từ VNPay
                 code = response_data.get("code")
                 message = response_data.get("message")
@@ -328,7 +329,6 @@ class PaymentProviderVNPay(models.Model):
                         'data': response_data
                     }
                 else:
-                    _logger.info(response_data.get("checkSum"))
                     # Xử lý lỗi dựa trên mã trạng thái
                     error_message = self._get_error_message(code, message)
                     _logger.error(f"VNPay hoàn tiền thất bại: {error_message}")
