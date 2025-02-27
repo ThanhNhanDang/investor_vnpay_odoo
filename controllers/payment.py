@@ -82,6 +82,7 @@ class VNPayController(http.Controller):
         save_session=False)
     def process_payment(self):
         data = request.get_json_data()
+        _logger.info(data)
         if not data:
             return request.make_json_response({"code": "06", "message": "Dữ liệu đầu vào không hợp lệ"})
         provider = request.env['payment.provider'].sudo().search([('code', '=', 'vnpay')], limit=1)
