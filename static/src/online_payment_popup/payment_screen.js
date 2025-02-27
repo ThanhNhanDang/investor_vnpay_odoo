@@ -175,8 +175,6 @@ patch(PaymentScreen.prototype, {
             });
             return false;
           }
-          console.log(onlinePaymentLine);
-          console.log(this.currentOrder);
           if (
             (prevOnlinePaymentLine &&
               prevOnlinePaymentLine?.get_payment_status() !== "done") ||
@@ -195,7 +193,7 @@ patch(PaymentScreen.prototype, {
           }
           onlinePaymentLine.set_payment_status("waiting");
           this.currentOrder.select_paymentline(onlinePaymentLine);
-
+          const channel = `vnpay_payment_${vnpayData.order_reference}`;
           if (vnpayData.type === "Refund") {
             if (onlinePaymentLine.get_payment_status() === "waiting") {
               onlinePaymentLine.set_payment_status(undefined);
@@ -213,7 +211,6 @@ patch(PaymentScreen.prototype, {
             };
             this.currentOrder.onlinePaymentData = onlinePaymentData;
 
-            const channel = `vnpay_payment_${vnpayData.order_reference}`;
             this.env.services.bus_service.addChannel(channel);
 
             const qrCodePopupCloser = this.dialog.add(
