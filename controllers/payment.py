@@ -9,6 +9,7 @@ import uuid
 import pytz
 import requests as pyreq
 import json
+import requests
 
 from werkzeug.exceptions import Forbidden # type: ignore
 from odoo import _, http, tools
@@ -236,6 +237,86 @@ class VNPayController(http.Controller):
             lambda line: line.account_id.internal_type in ('receivable', 'payable'))
         lines_to_reconcile.reconcile()
 
+    
+    def vnpay_check_invoice(self, txn_id, merchant_code, terminal_id, pay_date, secret_key):
+        """
+        Kiểm tra hóa đơn bằng cách gửi yêu cầu POST đến VNPay.
+
+        :param txn_id: Số hóa đơn (txnId)
+        :param merchant_code: Mã merchant
+        :param terminal_id: Mã terminal
+        :param pay_date: Ngày giao dịch (định dạng dd/MM/yyyy)
+        :param secret_key: Khóa bí mật để tính checksum
+        :return: Phản hồi từ VNPay
+        """
+        # Tạo checksum
+        data_to_hash = f"{pay_date}|{txn_id}|{merchant_code}|{terminal_id}|{secret_key}"
+        checksum = hashlib.md5(data_to_hash.encode('utf-8')).hexdigest()
+
+        # Dữ liệu yêu cầu
+        request_data = {
+            "txnId": txn_id,
+            "merchantCode": merchant_code,
+            "terminalID": terminal_id,
+            "payDate": pay_date,
+            "checkSum": checksum,
+        }
+
+        # URL của API
+        url = "https://doitac-tran.vnpaytest.vn/CheckTransaction/rest/api/CheckTrans"
+
+        try:
+            # Gửi yêu cầu POST
+            response = requests.post(url, json=request_data, headers={"Content-Type": "application/json"})
+
+            # Kiểm tra phản hồi
+            if response.status_code == 200:
+                response_data = response.json()
+                return response_data
+            else:
+                return _("Failed to check invoice. HTTP Status Code: %s", response.status_code)
+
+        except Exception as e:
+            return _("Error while checking invoice: %s", str(e))
+        
+        
+    @http.route(
+        "/check_vnpay_invoice",
+        type="http",
+        methods=["GET"],
+        auth="public",
+        csrf=False,
+        saveSession=False,  # No need to save the session
+    )
+    def check_vnpay_invoice(self, **kw):
+        """
+        Hàm tiện ích để kiểm tra hóa đơn từ POS Order.
+
+        :param txn_id: Số hóa đơn (txnId)
+        :param pos_order_id: ID của đơn hàng POS
+        :return: Kết quả kiểm tra hóa đơn
+        """
+        # Lấy thông tin provider VNPay
+        provider = request.env["payment.provider"].sudo().search([('code', '=', 'vnpay')], limit=1)
+        if not provider:
+            return _("VNPay payment provider is not configured.")
+
+        # Lấy thông tin đơn hàng POS
+        pos_order = request.env["pos.order"].browse(kw['pos_order_id'])
+        if not pos_order:
+            return _("POS Order not found.")
+
+        # Các tham số cần thiết
+        merchant_code = provider.vnpay_merchant_code
+        terminal_id = provider.vnpay_terminal_id
+        pay_date = pos_order.date_order.strftime("%d/%m/%Y")  # Định dạng ngày
+        secret_key = provider.vnpay_secret_key_qr
+
+        # Gọi hàm kiểm tra hóa đơn
+        result = self.vnpay_check_invoice(kw['txn_id'], merchant_code, terminal_id, pay_date, secret_key)
+
+        return result
+    
     @staticmethod
     def __hmacsha512(key, data):
         """Generate a HMAC SHA512 hash"""

@@ -247,7 +247,7 @@ class PaymentProviderVNPay(models.Model):
         
         # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
         md5_hash = hashlib.md5(input_string.encode('utf-8')).hexdigest().upper()
-        _logger.info(md5_hash)
+        _logger.info(pay_txn_id)
         
         return md5_hash
     
@@ -268,6 +268,8 @@ class PaymentProviderVNPay(models.Model):
         }
         return error_messages.get(code, message or _("Unknown error."))
     
+    
+    
     def vnpay_generate_qr(self, amount, reference,expDate, expDateFull, pos_order_id):
         provider = self.sudo().search([('code', '=', 'vnpay')], limit=1)
         
@@ -287,8 +289,8 @@ class PaymentProviderVNPay(models.Model):
             request_data = {
                 "merchantCode": provider.vnpay_merchant_code,
                 "qrTrace": payment_transaction.qrTrace,
-                "payTxnId": payment_transaction.reference,
-                "refundTxnId":reference,
+                "payTxnId":reference,
+                "refundTxnId":payment_transaction.reference,
                 "typeRefund":"2",
                 "amount": str((int(amount)*-1)),
                 "refundContent":"Hoàn tiền",
@@ -297,8 +299,8 @@ class PaymentProviderVNPay(models.Model):
                     provider.vnpay_secret_key_refund,
                     provider.vnpay_merchant_code,
                     payment_transaction.qrTrace,
-                    payment_transaction.reference,
                     reference,
+                    payment_transaction.reference,
                     "2",
                     str((int(amount)*-1)),
                     expDateFull
