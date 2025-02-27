@@ -89,7 +89,7 @@ patch(PaymentScreen.prototype, {
         this.dialog.add(AlertDialog, {
           title: _t("VNPAY Payment Error"),
           body:
-            response.message ||
+            response.error ||
             _t("Failed to process VNPAY " + response.type + " Payment"),
         });
         return false;
@@ -369,13 +369,11 @@ patch(PaymentScreen.prototype, {
     const remainingLines = this.getRemainingOnlinePaymentLines();
     let remainingAmount = 0;
     let amount = 0;
-    console.log("b");
 
     for (const line of remainingLines) {
       amount = line.get_amount();
       remainingAmount += amount;
     }
-    console.log("â");
     if (!this.env.utils.floatIsZero(unpaidAmount - remainingAmount)) {
       this.dialog.add(AlertDialog, {
         title: _t("Invalid online payments"),
