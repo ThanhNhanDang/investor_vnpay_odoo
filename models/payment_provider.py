@@ -270,6 +270,8 @@ class PaymentProviderVNPay(models.Model):
         provider = self.sudo().search([('code', '=', 'vnpay')], limit=1)
         
         if int(amount)<0:
+            _logger.info(pos_oder_id)
+            
             pos_order = self.env["pos.order"].search([("id","=", pos_oder_id)], limit=1)
             _logger.info(pos_order.refunded_order_id.id)
             payment_transaction=self.env["payment.transaction"].search([("pos_order_id", "=", pos_order.refunded_order_id.id)], limit=1)
