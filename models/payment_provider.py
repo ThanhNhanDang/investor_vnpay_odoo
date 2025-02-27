@@ -242,7 +242,7 @@ class PaymentProviderVNPay(models.Model):
         """
         # Tạo chuỗi cần mã hóa
         input_string = (
-            f"{secret_key}|{merchant_code}|{qr_trace}|{pay_txn_id}|{refund_txn_id}|{type_refund}|{amount}|{pay_date}"
+            f"{secret_key}{merchant_code}{qr_trace}{pay_txn_id}{refund_txn_id}{type_refund}{amount}{pay_date}"
         )
         _logger.info(input_string)
         
@@ -327,6 +327,7 @@ class PaymentProviderVNPay(models.Model):
                         'data': response_data
                     }
                 else:
+                    _logger.info(response_data.get("checkSum"))
                     # Xử lý lỗi dựa trên mã trạng thái
                     error_message = self._get_error_message(code, message)
                     _logger.error(f"VNPay hoàn tiền thất bại: {error_message}")
