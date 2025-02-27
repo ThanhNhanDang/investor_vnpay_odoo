@@ -246,8 +246,9 @@ class PaymentProviderVNPay(models.Model):
         )
         
         # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
-        md5_hash = hashlib.sha256(input_string.encode()).hexdigest()
-        _logger.info(pay_txn_id)
+        md5_hash = hashlib.sha256(input_string.encode()).hexdigest().upper()
+        _logger.info(md5_hash)
+        _logger.info(hashlib.md5(input_string.encode('utf-8')).hexdigest().upper())
         
         return md5_hash
     
