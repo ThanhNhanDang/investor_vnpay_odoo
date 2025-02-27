@@ -85,6 +85,8 @@ class VNPayController(http.Controller):
         data = request.get_json_data()
         if not data:
             return request.make_json_response({"code": "06", "message": "Dữ liệu đầu vào không hợp lệ"})
+        
+        _logger.info(data)
         provider = request.env['payment.provider'].sudo().search([('code', '=', 'vnpay')], limit=1)
         secret_key = provider.vnpay_secret_key_qr if provider else "vnpay@MERCHANT"
         try:
