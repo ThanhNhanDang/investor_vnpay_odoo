@@ -70,6 +70,12 @@
           <field name="vnpay_appID_qr"
             required="code == 'vnpay' and state != 'disabled'"
           />
+          <field name="vnpay_api_url_refund"
+            required="code == 'vnpay' and state != 'disabled'"
+          />
+          <field name="vnpay_secret_key_refund"
+            required="code == 'vnpay' and state != 'disabled'"
+          />
         </group>
       </group>
     </field>

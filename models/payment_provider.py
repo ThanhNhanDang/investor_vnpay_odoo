@@ -16,7 +16,7 @@ from odoo.addons.payment import utils as payment_utils
 from odoo.addons.investor_vnpay_odoo import const
 from io import BytesIO
 from odoo.addons.investor_vnpay_odoo.controllers.payment import VNPayController
-
+from odoo.addons.investor_vnpay_odoo.controllers import payment
 _logger = logging.getLogger(__name__)
 
 class PaymentProviderVNPay(models.Model):
@@ -76,6 +76,12 @@ class PaymentProviderVNPay(models.Model):
     vnpay_terminal_id  = fields.Char(
         string="vnpay_terminal_id", required_if_provider="vnpay"
     )
+    vnpay_api_url_refund = fields.Char(
+        "API URL Refund",
+        default="https://doitac-tran.vnpaytest.vn/mms/refund"
+    )
+    vnpay_secret_key_refund = fields.Char("Secret Key QR")
+    
     @api.model
     def _get_compatible_providers(
         self, *args, currency_id=None, is_validation=False, **kwargs
@@ -220,8 +226,117 @@ class PaymentProviderVNPay(models.Model):
         )
         return hashlib.md5(checksum_string.encode('utf-8')).hexdigest().upper()
 
-    def vnpay_generate_qr(self, amount, reference,expDate):
+    def refund_calculate_md5_hash(self,secret_key, merchant_code, qr_trace, pay_txn_id, refund_txn_id, type_refund, amount, pay_date):
+        """
+        Tính toán mã băm MD5 cho chuỗi đầu vào.
+        
+        :param secret_key: Chuỗi khóa bí mật
+        :param merchant_code: Mã merchant
+        :param qr_trace: Mã QR Trace
+        :param pay_txn_id: ID giao dịch thanh toán
+        :param refund_txn_id: ID giao dịch hoàn tiền
+        :param type_refund: Loại hoàn tiền
+        :param amount: Số tiền
+        :param pay_date: Ngày thanh toán
+        :return: Chuỗi mã băm MD5 dạng chữ in hoa
+        """
+        # Tạo chuỗi cần mã hóa
+        input_string = (
+            f"{secret_key}{merchant_code}{qr_trace}{pay_txn_id}{refund_txn_id}{type_refund}{amount}{pay_date}"
+        )
+        
+        # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
+        md5_hash = hashlib.md5(input_string.encode('utf-8')).hexdigest().upper()
+        return md5_hash
+    
+    def _get_error_message(self, code, message):
+        """
+        Trả về thông báo lỗi dựa trên mã trạng thái từ VNPay.
+        """
+        error_messages = {
+            "01": _("Checksum is wrong."),
+            "02": _("Money is invalid - a part."),
+            "03": _("Money is invalid - totality."),
+            "04": _("Not allow refund totality after refund a part."),
+            "11": _("Format data is wrong."),
+            "12": _("Transaction not found."),
+            "14": _("IP is denied."),
+            "96": _("System is maintaining."),
+            "99": _("Internal error."),
+        }
+        return error_messages.get(code, message or _("Unknown error."))
+    
+    def vnpay_generate_qr(self, amount, reference,expDate, expDateFull, pos_oder_id):
         provider = self.sudo().search([('code', '=', 'vnpay')], limit=1)
+        
+        if int(amount)<0:
+            pos_order = self.env["pos.order"].search([["id","=", pos_oder_id]], limit=1)
+            payment_transaction=self.env["payment.transaction"].search([["pos_order_id", "=", pos_order.refunded_order_id.id]])
+            if payment_transaction.provider_id.code != "vnpay":
+                return {
+                'success': False,
+                'type':"Refund",
+                'error': "Phương thức thanh toán của đơn hoàn tiền phải là VNpay!"
+            }
+            request_data = {
+                "merchantCode": provider.vnpay_merchant_code,
+                "qrTrace": payment_transaction.qrTrace,
+                "payTxnId": reference,
+                "refundTxnId":payment_transaction.reference,
+                "typeRefund":"2",
+                "amount": str((int(amount)*-1)),
+                "refundContent":"Hoàn tiền",
+                "payDate":expDateFull,
+                "checkSum":self.refund_calculate_md5_hash(
+                    provider.vnpay_secret_key_refund,
+                    provider.vnpay_merchant_code,
+                    payment_transaction.qrTrace,
+                    reference,
+                    payment_transaction.reference,
+                    "2",
+                    str((int(amount)*-1)),
+                    expDateFull
+                )
+            }
+            try:
+                response = requests.post(
+                    provider.vnpay_api_url_refund,
+                    json=request_data,
+                    headers={"Content-Type": "text/plain"}
+                )
+                response_data = response.json()
+                # Kiểm tra mã trạng thái từ VNPay
+                code = response_data.get("code")
+                message = response_data.get("message")
+                referenceSplit = reference.split('.')
+
+                if code == "00":
+                    # Giao dịch hoàn tiền thành công
+                    _logger.info(f"VNPay hoàn tiền thành công: {response_data}")
+                    transaction = payment._create_transaction(amount, referenceSplit[0], reference, referenceSplit[1], referenceSplit[2],response_data.get("qrTraceRefund"))
+                    transaction._process_pos_online_payment()
+                    return {
+                        'success': True,
+                        'type':"Refund",
+                        'message': message,
+                        'data': response_data
+                    }
+                else:
+                    # Xử lý lỗi dựa trên mã trạng thái
+                    error_message = self._get_error_message(code, message)
+                    _logger.error(f"VNPay hoàn tiền thất bại: {error_message}")
+                    return {
+                        'success': False,
+                        'type':"Refund",
+                        'error': error_message
+                    }
+            except Exception as e:
+                _logger.error(f"VNPay hoàn tiền thất bại, lỗi server!!: {str(e)}")
+                return {
+                    'success': False,
+                    'type':"Refund",
+                    'error':"VNPay hoàn tiền thất bại, lỗi server!!"
+                }
         request_data = {
             "appId": provider.vnpay_appID_qr,
             "merchantName": provider.vnpay_merchant_name,
@@ -234,7 +349,7 @@ class PaymentProviderVNPay(models.Model):
             "payType": "03",
             "productId": "",
             "txnId": reference,
-            "amount": str(int(amount)),
+            "amount": str(amount),
             "tipAndFee": "",
             "ccy": "704",
             "expDate": expDate,
@@ -261,7 +376,7 @@ class PaymentProviderVNPay(models.Model):
             qr = qrcode.QRCode(
                 border=0  # Loại bỏ viền trắng
             )
-# Tạo ảnh QR không có viền trắng
+            # Tạo ảnh QR không có viền trắng
             qr.add_data(response_data.get('data'))
             qr.make(fit=True)
             
@@ -273,6 +388,7 @@ class PaymentProviderVNPay(models.Model):
             if response_data.get('code') == '00':
                 return {
                     'success': True,
+                    'type':"QR",
                     'qr_data': qr_image,
                     'qr_id': response_data.get('idQrcode')
                 }
@@ -280,6 +396,7 @@ class PaymentProviderVNPay(models.Model):
                 _logger.error(f"VNPAY QR Generation Error: {response_data.get('message')}")
                 return {
                     'success': False,
+                    'type':"QR",
                     'error': response_data.get('message')
                 }
                 
@@ -287,5 +404,6 @@ class PaymentProviderVNPay(models.Model):
             _logger.error(f"VNPAY API Error: {str(e)}")
             return {
                 'success': False,
+                'type':"QR",
                 'error': str(e)
             }

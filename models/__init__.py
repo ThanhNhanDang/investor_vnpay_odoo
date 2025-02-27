@@ -4,3 +4,4 @@ from . import payment_provider
 from . import product_template_inherit
 from . import pos_payment_method
 from . import account_move
+from . import payment_transaction

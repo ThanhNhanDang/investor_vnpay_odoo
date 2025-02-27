@@ -103,7 +103,7 @@ class VNPayController(http.Controller):
             # Tạo giao dịch thanh toán
             referenceSplit = data.get("txnId").split('.')
             transaction = self._create_transaction(
-                data.get("amount"), int(referenceSplit[0]), data.get("txnId"), int(referenceSplit[1]), int(referenceSplit[2]))
+                data.get("amount"), int(referenceSplit[0]), data.get("txnId"), int(referenceSplit[1]), int(referenceSplit[2],data.get('qrTrace') ))
             if data.get("code") == "00":
                 transaction._set_done()
             else:
@@ -179,7 +179,7 @@ class VNPayController(http.Controller):
         invoice = invoice_obj.create(invoice_vals)
         return invoice
 
-    def _create_transaction(self, amount, partner_id, reference, company_id = None, pos_order_id = None):
+    def _create_transaction(self, amount, partner_id, reference, company_id = None, pos_order_id = None, qrTrace=None):
         """Tạo giao dịch thanh toán với quyền sudo."""
         transaction_obj = request.env['payment.transaction'].sudo()
         payment_method_obj = request.env['payment.method'].sudo()
@@ -207,7 +207,8 @@ class VNPayController(http.Controller):
                 'currency_id': currency.id if currency else None,
                 'state': 'done',
                 "company_id":company_id,
-                'pos_order_id':pos_order_id
+                'pos_order_id':pos_order_id,
+                'qrTrace':qrTrace
             }
             transaction = transaction_obj.create(transaction_vals)
         return transaction
