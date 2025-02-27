@@ -253,7 +253,7 @@ class PaymentProviderVNPay(models.Model):
         )
         
         # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
-        md5_hash = hashlib.md5(input_string.encode('utf-8')).hexdigest().upper()
+        md5_hash = hashlib.md5(input_string.encode()).hexdigest().upper()
         _logger.info(md5_hash)
         _logger.info(hashlib.md5(input_string.encode('utf-8')).hexdigest().upper())
         
@@ -304,7 +304,7 @@ class PaymentProviderVNPay(models.Model):
                 "refundContent":"Hoàn tiền",
                 "payDate":expDateFull,
                 "checkSum":self.refund_calculate_md5_hash(
-                    provider.vnpay_secret_key_qr,
+                    provider.vnpay_secret_key_refund,
                     provider.vnpay_merchant_code,
                     payment_transaction.qrTrace,
                     payment_transaction.reference,
