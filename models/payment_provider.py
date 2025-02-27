@@ -244,9 +244,10 @@ class PaymentProviderVNPay(models.Model):
         input_string = (
             f"{secret_key}{merchant_code}{qr_trace}{pay_txn_id}{refund_txn_id}{type_refund}{amount}{pay_date}"
         )
+        _logger.info(input_string)
         
         # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
-        md5_hash = hashlib.md5(input_string.encode('utf-8')).hexdigest().upper()
+        md5_hash = hashlib.md5(input_string.encode('utf-8')).hexdigest()
         return md5_hash
     
     def _get_error_message(self, code, message):
@@ -274,10 +275,8 @@ class PaymentProviderVNPay(models.Model):
             
             pos_order = self.env["pos.order"].search([("id","=", pos_order_id)], limit=1)
             _logger.info(pos_order.refunded_order_id.id)
+            #Sudo sẽ bỏ qua điều kiện check company và check login
             payment_transaction=self.env["payment.transaction"].sudo().search([("pos_order_id", "=", pos_order.refunded_order_id.id)], limit=1)
-            _logger.info(payment_transaction.provider_id.code)
-            _logger.info(payment_transaction.provider_id)
-            _logger.info(payment_transaction)
             if payment_transaction.provider_id.code != "vnpay":
                 return {
                 'success': False,
