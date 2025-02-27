@@ -266,15 +266,15 @@ class PaymentProviderVNPay(models.Model):
         }
         return error_messages.get(code, message or _("Unknown error."))
     
-    def vnpay_generate_qr(self, amount, reference,expDate, expDateFull, pos_oder_id):
+    def vnpay_generate_qr(self, amount, reference,expDate, expDateFull, pos_order_id):
         provider = self.sudo().search([('code', '=', 'vnpay')], limit=1)
         
         if int(amount)<0:
-            _logger.info(pos_oder_id)
+            _logger.info(pos_order_id)
             
-            pos_order = self.env["pos.order"].search([("id","=", pos_oder_id)], limit=1)
+            pos_order = self.env["pos.order"].search([("id","=", pos_order_id)], limit=1)
             _logger.info(pos_order.refunded_order_id.id)
-            payment_transaction=self.env["payment.transaction"].search([("pos_order_id", "=", pos_order.refunded_order_id.id)], limit=1)
+            payment_transaction=self.env["payment.transaction"].sudo().search([("pos_order_id", "=", pos_order.refunded_order_id.id)], limit=1)
             _logger.info(payment_transaction.provider_id.code)
             _logger.info(payment_transaction.provider_id)
             _logger.info(payment_transaction)

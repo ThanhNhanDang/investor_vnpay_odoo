@@ -207,7 +207,7 @@ class VNPayController(http.Controller):
                 'provider_id': payment_provider.id,
                 'currency_id': currency.id if currency else None,
                 'state': 'done',
-                "company_id":company_id,
+                "company_id":company_id, # readonly
                 'pos_order_id':pos_order_id,
                 'qrTrace':qrTrace
             }
