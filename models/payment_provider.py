@@ -299,8 +299,8 @@ class PaymentProviderVNPay(models.Model):
                 "qrTrace": payment_transaction.qrTrace,
                 "payTxnId":payment_transaction.reference,
                 "refundTxnId":reference,
-                "typeRefund":"2",
-                "amount": (int(amount)*-1),
+                "typeRefund":"1",
+                "amount": "74600",
                 "refundContent":"Hoàn tiền",
                 "payDate":expDateFull,
                 "checkSum":self.refund_calculate_md5_hash(
@@ -309,8 +309,8 @@ class PaymentProviderVNPay(models.Model):
                     payment_transaction.qrTrace,
                     payment_transaction.reference,
                     reference,
-                    "2",
-                    (int(amount)*-1),
+                    "1",
+                    "74600",
                     expDateFull
                 )
             }
