@@ -198,7 +198,6 @@ patch(PaymentScreen.prototype, {
                 if (event.data.txnId === vnpayData.order_reference) {
                   if (event.data.status === "done") {
                     onlinePaymentLine.paymentCompleted = true;
-                    onlinePaymentLine.set_payment_status("paid");
                     resolve(true);
                   } else if (data.status === "error") {
                     console.error(
