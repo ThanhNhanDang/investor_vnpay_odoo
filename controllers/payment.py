@@ -140,6 +140,7 @@ class VNPayController(http.Controller):
                 "data": {"txnId": data.get("txnId")}
             })
         except Exception as e:
+            _logger.info(str(e))
             return request.make_json_response({"code": "06", "message": "Lỗi hệ thống", "error": str(e)})
 
     @http.route(

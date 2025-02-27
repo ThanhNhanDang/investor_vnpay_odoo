@@ -80,7 +80,7 @@ class PaymentProviderVNPay(models.Model):
         "API URL Refund",
         default="https://doitac-tran.vnpaytest.vn/mms/refund"
     )
-    vnpay_secret_key_refund = fields.Char("Secret Key QR")
+    vnpay_secret_key_refund = fields.Char("Secret Key Refund")
     
     @api.model
     def _get_compatible_providers(
