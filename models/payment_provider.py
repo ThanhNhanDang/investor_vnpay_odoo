@@ -304,7 +304,7 @@ class PaymentProviderVNPay(models.Model):
                 "refundContent":"Hoàn tiền",
                 "payDate":expDateFull,
                 "checkSum":self.refund_calculate_md5_hash(
-                    provider.vnpay_secret_key_refund,
+                    provider.vnpay_secret_key_qr,
                     provider.vnpay_merchant_code,
                     payment_transaction.qrTrace,
                     payment_transaction.reference,
