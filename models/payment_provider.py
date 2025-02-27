@@ -251,7 +251,7 @@ class PaymentProviderVNPay(models.Model):
             f"{amount}"
             f"{pay_date}"
         )
-        
+        _logger.info(qr_trace)
         # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
         md5_hash = hashlib.md5(input_string.encode()).hexdigest().upper()
         _logger.info(md5_hash)

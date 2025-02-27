@@ -300,7 +300,7 @@ class VNPayController(http.Controller):
         """
 
         # Gọi hàm kiểm tra hóa đơn
-        result = self.vnpay_check_invoice("7be390b5e-f6ad-4758-9831-d5fab22d0750", "0317155027ABC", "T4TEKQRR", "26/02/2025", "vnpay@123@langhaHangLa")
+        result = self.vnpay_check_invoice("7.2.65.3d01d256-c3ef-4069-bb7a-9d3f0a07dce5", "0317155027ABC", "T4TEKQRR", "27/02/2025", "vnpay@123@langhaHangLa")
         _logger.info(result)
         return result
     
