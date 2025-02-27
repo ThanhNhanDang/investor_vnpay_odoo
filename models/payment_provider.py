@@ -242,7 +242,7 @@ class PaymentProviderVNPay(models.Model):
         """
         # Tạo chuỗi cần mã hóa
         input_string = (
-            f"{secret_key}{merchant_code}{qr_trace}{pay_txn_id}{refund_txn_id}{type_refund}{amount}{pay_date}"
+            f"{secret_key}+{merchant_code}+{qr_trace}+{pay_txn_id}+{refund_txn_id}+{type_refund}+{amount}+{pay_date}"
         )
         _logger.info(input_string)
         
