@@ -272,6 +272,7 @@ patch(PaymentScreen.prototype, {
         console.log(3);
       }
       console.log(1);
+      console.log(lastOrderServerOPData)
       if (!lastOrderServerOPData || !lastOrderServerOPData.is_paid) {
         return false;
       }
