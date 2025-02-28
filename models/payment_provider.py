@@ -347,7 +347,7 @@ class PaymentProviderVNPay(models.Model):
                 return {
                     'success': False,
                     'type':"Refund",
-                    'error':"VNPay hoàn tiền thất bại, lỗi server!!"
+                    'error':"VNPay hoàn tiền thất bại, lỗi server!!: "+str(e)
                 }
         request_data = {
             "appId": provider.vnpay_appID_qr,
