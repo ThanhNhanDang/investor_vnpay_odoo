@@ -251,7 +251,9 @@ class PaymentProviderVNPay(models.Model):
             f"{amount}|"
             f"{pay_date}"
         )
+        _logger.info(input_string)
         md5_hash = hashlib.md5(input_string.encode()).hexdigest().upper()
+        _logger.info(md5_hash)
         input_string = (
             f"{secret_key}"
             f"{merchant_code}"
@@ -262,6 +264,7 @@ class PaymentProviderVNPay(models.Model):
             f"{98800}"
             f"{pay_date}"
         )
+        _logger.info(input_string)
         # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
         _logger.info(hashlib.md5(input_string.encode('utf-8')).hexdigest().upper())
         
