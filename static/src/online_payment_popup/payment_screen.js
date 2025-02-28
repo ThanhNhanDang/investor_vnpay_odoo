@@ -240,6 +240,7 @@ patch(PaymentScreen.prototype, {
                         company_id: this.env.services.company.currentCompany.id,
                         txnId: event.data.txnId,
                         pos_order_id: this.currentOrder.id,
+                        qrTrace: event.data.qrTrace
                       });
                       resolve(true);
                     } else if (data.status === "error") {

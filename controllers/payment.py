@@ -122,6 +122,7 @@ class VNPayController(http.Controller):
                 {
                     "data": {
                         "txnId": data.get("txnId"),
+                        "qrTrace":data.get("qrTrace"),
                         "status": "done",
                         "message": "Thanh toán " + ("thành công" if data.get("code") == "00" else "thất bại")
                     },
