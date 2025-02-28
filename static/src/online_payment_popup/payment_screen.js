@@ -68,9 +68,7 @@ patch(PaymentScreen.prototype, {
     const expDate = this.getVNPayExpDate();
     const expDateFull = this.getVNPayExpDateFull();
     const order_reference =
-      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${
-        this.currentOrder.id
-      }_${paymentLine.payment_method_id.id}`.substring(0, 15);
+      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${this.currentOrder.id}${paymentLine.payment_method_id.id}`.substring(0, 15);
     try {
       const response = await this.env.services.orm.call(
         "payment.provider",
