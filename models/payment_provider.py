@@ -16,7 +16,6 @@ from odoo.addons.payment import utils as payment_utils
 from odoo.addons.investor_vnpay_odoo import const
 from io import BytesIO
 from odoo.addons.investor_vnpay_odoo.controllers.payment import VNPayController
-from odoo.addons.investor_vnpay_odoo.controllers import payment
 _logger = logging.getLogger(__name__)
 
 class PaymentProviderVNPay(models.Model):
@@ -327,7 +326,7 @@ class PaymentProviderVNPay(models.Model):
                 if code == "00":
                     # Giao dịch hoàn tiền thành công
                     _logger.info(f"VNPay hoàn tiền thành công: {response_data}")
-                    transaction = payment._create_transaction(amount, partner_id, reference, company_id, pos_order_id,response_data.get("qrTraceRefund"))
+                    transaction = VNPayController._create_transaction(amount, partner_id, reference, company_id, pos_order_id,response_data.get("qrTraceRefund"))
                     transaction._process_pos_online_payment()
                     return {
                         'success': True,
