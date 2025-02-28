@@ -242,32 +242,17 @@ class PaymentProviderVNPay(models.Model):
         """
         # Tạo chuỗi cần mã hóa
         input_string = (
-            f"{secret_key}|"
-            f"{merchant_code}|"
-            f"{qr_trace}|"
-            f"{pay_txn_id}|"
-            f"{refund_txn_id}|"
-            f"{type_refund}|"
-            f"{amount}|"
-            f"{pay_date}"
-        )
-        _logger.info(input_string)
-        md5_hash = hashlib.md5(input_string.encode()).hexdigest().upper()
-        _logger.info(md5_hash)
-        input_string = (
             f"{secret_key}"
             f"{merchant_code}"
             f"{qr_trace}"
             f"{pay_txn_id}"
             f"{refund_txn_id}"
-            f"{1}"
-            f"{98800}"
+            f"{type_refund}"
+            f"{amount}"
             f"{pay_date}"
         )
-        _logger.info(input_string)
         # Mã hóa chuỗi bằng thuật toán MD5 và chuyển thành chữ in hoa
-        _logger.info(hashlib.md5(input_string.encode('utf-8')).hexdigest().upper())
-        
+        md5_hash = hashlib.md5(input_string.encode("utf-8")).hexdigest().upper()
         return md5_hash
     
     def _get_error_message(self, code, message):
@@ -311,7 +296,7 @@ class PaymentProviderVNPay(models.Model):
                 "payTxnId":payment_transaction.reference,
                 "refundTxnId":reference,
                 "typeRefund":"2",
-                "amount": (int(amount)*-1),
+                "amount": str((int(amount)*-1)),
                 "refundContent":"Hoàn tiền",
                 "payDate":expDateFull,
                 "checkSum":self.refund_calculate_md5_hash(
@@ -321,7 +306,7 @@ class PaymentProviderVNPay(models.Model):
                     payment_transaction.reference,
                     reference,
                     "2",
-                    (int(amount)*-1),
+                    str((int(amount)*-1)),
                     expDateFull
                 )
             }
