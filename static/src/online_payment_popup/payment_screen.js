@@ -23,8 +23,6 @@ patch(PaymentScreen.prototype, {
   getVNPayExpDateFull() {
     // Create expiration date 15 minutes from now
     const now = new Date();
-    now.setMinutes(now.getMinutes() + 15); // Add 15 minutes to the current time
-
     const year = now.getFullYear(); // Full year (YYYY)
     const month = String(now.getMonth() + 1).padStart(2, "0"); // Month (mm)
     const day = String(now.getDate()).padStart(2, "0"); // Day (DD)
