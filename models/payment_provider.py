@@ -260,8 +260,8 @@ class PaymentProviderVNPay(models.Model):
         """
         error_messages = {
             "01": _("Checksum is wrong."),
-            "02": _("Tiền trong hóa đơn không đủ để hoàn trả."),
-            "03": _("Money is invalid - totality."),
+            "02": _("Hoàn trả một phần -Tiền trong hóa đơn không đủ để hoàn trả."),
+            "03": _("Hoàn trả toàn bộ - Tiền trong hóa đơn không đủ để hoàn trả"),
             "04": _("Not allow refund totality after refund a part."),
             "11": _("Format data is wrong."),
             "12": _("Transaction not found."),
