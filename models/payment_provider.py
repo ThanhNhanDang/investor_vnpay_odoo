@@ -325,8 +325,7 @@ class PaymentProviderVNPay(models.Model):
 
                 if code == "00":
                     # Giao dịch hoàn tiền thành công
-                    _logger.info(f"VNPay hoàn tiền thành công: {response_data}")
-                    transaction = VNPayController._create_transaction(amount, partner_id, reference, company_id, pos_order_id,response_data.get("qrTraceRefund"))
+                    transaction = VNPayController._create_transaction(False,amount, partner_id, reference, company_id, pos_order_id,response_data.get("qrTraceRefund"))
                     transaction._process_pos_online_payment()
                     return {
                         'success': True,
