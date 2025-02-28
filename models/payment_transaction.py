@@ -15,7 +15,7 @@ class PaymentTransactionVNPay(models.Model):
         string="VNPay Website Code (TmnCode)"
     )
     
-    def _process_pos_online_payment(self):
+    def _process_pos_online_payment_2(self):
         for tx in self:
             if tx and tx.pos_order_id and tx.state in ('authorized', 'done') and not tx.payment_id.pos_order_id:
                 pos_order = tx.pos_order_id
