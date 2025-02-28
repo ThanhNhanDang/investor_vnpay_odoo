@@ -82,6 +82,8 @@ patch(PaymentScreen.prototype, {
           expDate,
           expDateFull,
           this.currentOrder.id,
+          user.partnerId,
+          this.env.services.company.currentCompany.id,
         ], // Thêm expDate với định dạng yêu cầu],
         {}
       );
