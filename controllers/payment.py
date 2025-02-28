@@ -79,6 +79,17 @@ class VNPayController(http.Controller):
         generated_checksum = hashlib.md5(raw_string.encode()).hexdigest().upper()
         return generated_checksum == data.get("checksum")
     
+    @http.route('/api/vnpay-qr/create-transaction', type='json', auth='user', csrf=False,
+        save_session=False)
+    
+    def vnPayCreateTransaction(self, **kw):
+        # Tạo giao dịch thanh toán
+        transaction = self._create_transaction(
+            kw.get("amount"), int(kw.get("partner_id")), kw.get("txnId"), int(kw.get("company_id")), int(kw.get("pos_order_id")), kw.get('qrTrace'))
+        transaction._process_pos_online_payment()
+        return {
+            'success': True,
+        }
     @http.route('/api/vnpay-ipn/qr', type='http', auth='public', methods=['POST'], csrf=False,
         save_session=False)
     def process_payment(self):
@@ -103,14 +114,7 @@ class VNPayController(http.Controller):
             #     'merchant_code': data.get("merchantCode"),
             #     'status': 'pending'
             # })
-            # Tạo giao dịch thanh toán
-            referenceSplit = data.get("txnId").split('_')
-            transaction = self._create_transaction(
-                data.get("amount"), int(referenceSplit[0]), data.get("txnId"), int(referenceSplit[1]), int(referenceSplit[2]), data.get('qrTrace'))
-            if data.get("code") == "00":
-                transaction._set_done()
-            else:
-                transaction._set_error(f"VNPay error: {data.get('message', 'Unknown error')}")
+          
             # Gửi thông báo qua Bus
             request.env['bus.bus']._sendone(
                 f"vnpay_payment_{data.get('txnId')}",
@@ -118,7 +122,7 @@ class VNPayController(http.Controller):
                 {
                     "data": {
                         "txnId": data.get("txnId"),
-                        "status": transaction.state,
+                        "status": "done",
                         "message": "Thanh toán " + ("thành công" if data.get("code") == "00" else "thất bại")
                     },
                     "channel": f"vnpay_payment_{data.get('txnId')}"
@@ -131,7 +135,7 @@ class VNPayController(http.Controller):
             # self._mark_invoice_as_paid(invoice, transaction)
            
             # Trả về phản hồi thành công
-            transaction._process_pos_online_payment()
+            
             _logger.info({
                 "code": "00",
                 "message": "Đơn hàng thanh toán thành công",

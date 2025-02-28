@@ -289,7 +289,7 @@ class PaymentProviderVNPay(models.Model):
     
     
     
-    def vnpay_generate_qr(self, amount, reference,expDate, expDateFull, pos_order_id):
+    def vnpay_generate_qr(self, amount, reference,expDate, expDateFull, pos_order_id, partner_id, company_id):
         provider = self.sudo().search([('code', '=', 'vnpay')], limit=1)
         
         if int(amount)<0:
@@ -338,12 +338,11 @@ class PaymentProviderVNPay(models.Model):
                 # Kiểm tra mã trạng thái từ VNPay
                 code = response_data.get("code")
                 message = response_data.get("message")
-                referenceSplit = reference.split('_')
 
                 if code == "00":
                     # Giao dịch hoàn tiền thành công
                     _logger.info(f"VNPay hoàn tiền thành công: {response_data}")
-                    transaction = payment._create_transaction(amount, referenceSplit[0], reference, referenceSplit[1], referenceSplit[2],response_data.get("qrTraceRefund"))
+                    transaction = payment._create_transaction(amount, partner_id, reference, company_id, pos_order_id,response_data.get("qrTraceRefund"))
                     transaction._process_pos_online_payment()
                     return {
                         'success': True,

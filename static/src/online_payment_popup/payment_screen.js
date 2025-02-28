@@ -5,6 +5,8 @@ import { OnlinePaymentPopup } from "@pos_online_payment/app/online_payment_popup
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { qrCodeSrc } from "@point_of_sale/utils";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
+import { rpc } from "@web/core/network/rpc";
+
 import { user } from "@web/core/user";
 patch(PaymentScreen.prototype, {
   getVNPayExpDate() {
@@ -66,9 +68,9 @@ patch(PaymentScreen.prototype, {
     const expDate = this.getVNPayExpDate();
     const expDateFull = this.getVNPayExpDateFull();
     const order_reference =
-      `${user.partnerId.toString()}_${this.env.services.company.currentCompany.id.toString()}_${
+      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${
         this.currentOrder.id
-      }_${this.props.orderUuid}`.substring(0, 15);
+      }_${paymentLine.payment_method_id.id}`.substring(0, 15);
     try {
       const response = await this.env.services.orm.call(
         "payment.provider",
@@ -227,10 +229,18 @@ patch(PaymentScreen.prototype, {
               onlinePaymentLine.onlinePaymentResolver = resolve;
               this.env.services.bus_service.subscribe(
                 "payment_vnpayQR_update",
-                (event) => {
+                async (event) => {
                   if (event.data.txnId === vnpayData.order_reference) {
                     if (event.data.status === "done") {
                       onlinePaymentLine.paymentCompleted = true;
+
+                      await rpc("/api/vnpay-qr/create-transaction", {
+                        amount: onlinePaymentLine.get_amount(),
+                        partner_id: user.partnerId,
+                        company_id: this.env.services.company.currentCompany.id,
+                        txnId: event.data.txnId,
+                        pos_order_id: this.currentOrder.id,
+                      });
                       resolve(true);
                     } else if (data.status === "error") {
                       console.error(

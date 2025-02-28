@@ -4,17 +4,16 @@ import json
 
 # VNPay secret key (replace with the actual key provided by VNPay)
 secretKey = "vnpayRefund"  # Ensure this is the correct secret key
-
 # Request data
 data = {
     "merchantCode": "0317155027ABC",
     "amount": "24200",  # Ensure this is in the correct format (e.g., no decimals)
-    "refundTxnId": "72718420260",  # Remove dots and non-numeric characters if required
+    "refundTxnId": "18947891988292643",  # Remove dots and non-numeric characters if required
     "typeRefund": "2",
-    "qrTrace": "244555634",
+    "qrTrace": "244555661",
     "refundContent": "",
-    "payTxnId": "727075287524",  # Remove dots and non-numeric characters if required
-    "payDate": "20250228111115",
+    "payTxnId": "18947891988292608",  # Remove dots and non-numeric characters if required
+    "payDate": "20250228143820",
 }
 
 # Generate checkSum (secretKey must come first, as per VNPay documentation)
