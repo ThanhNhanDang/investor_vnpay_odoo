@@ -338,7 +338,7 @@ class PaymentProviderVNPay(models.Model):
                 # Kiểm tra mã trạng thái từ VNPay
                 code = response_data.get("code")
                 message = response_data.get("message")
-                referenceSplit = reference.split('.')
+                referenceSplit = reference.split('_')
 
                 if code == "00":
                     # Giao dịch hoàn tiền thành công

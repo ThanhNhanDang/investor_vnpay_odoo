@@ -104,7 +104,7 @@ class VNPayController(http.Controller):
             #     'status': 'pending'
             # })
             # Tạo giao dịch thanh toán
-            referenceSplit = data.get("txnId").split('.')
+            referenceSplit = data.get("txnId").split('_')
             transaction = self._create_transaction(
                 data.get("amount"), int(referenceSplit[0]), data.get("txnId"), int(referenceSplit[1]), int(referenceSplit[2]), data.get('qrTrace'))
             if data.get("code") == "00":
