@@ -16,7 +16,6 @@ from odoo import _, http, tools
 from odoo.http import request
 from odoo.exceptions import AccessError, MissingError, ValidationError
 
-
 from datetime import datetime, timedelta
 from odoo.fields import Command
 from odoo.addons.payment.controllers import portal as payment_portal

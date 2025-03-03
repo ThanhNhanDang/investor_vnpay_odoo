@@ -9,6 +9,11 @@ import { rpc } from "@web/core/network/rpc";
 
 import { user } from "@web/core/user";
 patch(PaymentScreen.prototype, {
+  setup() {
+    super.setup(...arguments);
+    console.log(this)
+  },
+ 
   getVNPayExpDate() {
     // Create expiration date 15 minutes from now
     const now = new Date();
@@ -68,7 +73,9 @@ patch(PaymentScreen.prototype, {
     const expDate = this.getVNPayExpDate();
     const expDateFull = this.getVNPayExpDateFull();
     const order_reference =
-      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${this.currentOrder.id}${paymentLine.payment_method_id.id}`.substring(0, 15);
+      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${
+        this.currentOrder.id
+      }${paymentLine.payment_method_id.id}`.substring(0, 15);
     try {
       const response = await this.env.services.orm.call(
         "payment.provider",
@@ -240,7 +247,7 @@ patch(PaymentScreen.prototype, {
                         company_id: this.env.services.company.currentCompany.id,
                         txnId: event.data.txnId,
                         pos_order_id: this.currentOrder.id,
-                        qrTrace: event.data.qrTrace
+                        qrTrace: event.data.qrTrace,
                       });
                       resolve(true);
                     } else if (data.status === "error") {
