@@ -11,16 +11,13 @@ import { onMounted, useState } from "@odoo/owl";
 patch(OrderSummary.prototype, {
   setup() {
     super.setup(...arguments);
-    console.log(this);
-    // this.numberBuffer = useService("number_buffer2");
-    // onMounted(this.onMounted);
-    // onMounted(() => this.numberBuffer.reset());
-    // this.numberBuffer.use({
-    //   triggerAtInput: (...args) => {
-    //     if (!this.pos.tempScreenIsShown) this.updateSelectedOrderline(...args);
-    //   },
-    //   useWithBarcode: true,
-    // });
+    this.numberBuffer = useService("custom_number_buffer");
+    this.numberBuffer.use({
+      triggerAtInput: (...args) => this.updateSelectedOrderline(...args),
+      useWithBarcode: true,
+    });
+    this.isSwitchPlus = false;
+    this.isSwitchMinus = false;
   },
 
   async updateSelectedOrderline({ buffer, key }) {
@@ -120,32 +117,100 @@ patch(OrderSummary.prototype, {
       }
       return;
     }
-
-    let val = 0;
-    const value = this._getValue();
-    if (buffer) {
-      if (key !== "Backspace") val = buffer;
-      else {
-        this.numberBuffer.reset();
+    let val = buffer === null ? "remove" : buffer;
+    if (key === "C") {
+      val = "remove";
+    } else if (key === " + ") {
+      if (this.isSwitchPlus === true) {
+        const value = this._getValue();
+        val = value + 1;
+        this.numberBuffer.set(val.toString());
+      } else {
+        this.isSwitchPlus = true;
+        this.isSwitchMinus = false;
+        return;
+      }
+    } else if (key === " - ") {
+      if (this.isSwitchMinus === true) {
+        const value = this._getValue();
         val = value <= 0 ? "remove" : value - 1;
+        val !== "remove" ?? this.numberBuffer.set(val.toString());
+      } else {
+        this.isSwitchPlus = false;
+        this.isSwitchMinus = true;
+        return;
       }
     } else {
-      this.numberBuffer.reset();
-      val = value <= 0 ? "remove" : value - 1;
+      if (this.pos.numpadMode !== " + " && this.pos.numpadMode !== " - ") {
+        this.isSwitchPlus = false;
+        this.isSwitchMinus = false;
+      } else {
+        if (this.pos.numpadMode === " + ") {
+          if (this.isInteger(key)) {
+            const value = this._getValue();
+            val = value + parseInt(key);
+            this.numberBuffer.set(val.toString());
+          }
+        } else if (this.pos.numpadMode === " - ") {
+          if (this.isInteger(key)) {
+            const value = this._getValue();
+            val = value - parseInt(key);
+            if (val < 0) val = 0;
+            this.numberBuffer.set(val.toString());
+          }
+        }
+      }
     }
-    this._setValue(value !== "" ? val : "");
 
+    this._setValue(val);
     if (val == "remove") {
       this.numberBuffer.reset();
       this.pos.numpadMode = "quantity";
     }
-    // const val = buffer === null ? "remove" : buffer;
-    // this._setValue(val);
-    // if (val == "remove") {
-    //   this.numberBuffer.reset();
-    //   this.pos.numpadMode = "quantity";
-    // }
   },
+  isInteger(value) {
+    // Chuyển giá trị sang số
+    let num = Number(value);
+
+    // Kiểm tra có phải số nguyên không
+    return Number.isInteger(num);
+  },
+
+  _setValue(val) {
+    const { numpadMode } = this.pos;
+    let selectedLine = this.currentOrder.get_selected_orderline();
+    if (selectedLine) {
+      if (
+        numpadMode === "quantity" ||
+        numpadMode === " + " ||
+        numpadMode === " - "
+      ) {
+        if (selectedLine.combo_parent_id) {
+          selectedLine = selectedLine.combo_parent_id;
+        }
+        if (val === "remove") {
+          this.currentOrder.removeOrderline(selectedLine);
+        } else {
+          const result = selectedLine.set_quantity(
+            val,
+            Boolean(selectedLine.combo_line_ids?.length)
+          );
+          for (const line of selectedLine.combo_line_ids) {
+            line.set_quantity(val, true);
+          }
+          if (result !== true) {
+            this.dialog.add(AlertDialog, result);
+            this.numberBuffer.reset();
+          }
+        }
+      } else if (numpadMode === "discount" && val !== "remove") {
+        this.pos.setDiscountFromUI(selectedLine, val);
+      } else if (numpadMode === "price" && val !== "remove") {
+        this.setLinePrice(selectedLine, val);
+      }
+    }
+  },
+
   _getValue() {
     const selectedLine = this.currentOrder.get_selected_orderline();
     if (selectedLine === undefined) return -1;
