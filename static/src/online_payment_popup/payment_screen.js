@@ -441,9 +441,7 @@ patch(PaymentScreen.prototype, {
     // link.click();
 
     if (this.webSocket.isConnect() == 1) {
-      this.webSocket.send(
-        png.toDataURL().replace("data:image/jpeg;base64,", "")
-      );
+      this.webSocket.send(png.toDataURL("image/png").split(";base64,")[1]);
       this.notification.add(_t("Gửi thành công"), {
         type: "success",
       });
