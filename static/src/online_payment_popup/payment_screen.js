@@ -411,7 +411,7 @@ patch(PaymentScreen.prototype, {
   },
 
   async afterOrderValidation(suggestToSync = true) {
-    this.downloadReceipt();
+    await this.downloadReceipt();
     return await super.afterOrderValidation(...arguments);
   },
 
