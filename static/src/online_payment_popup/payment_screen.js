@@ -6,25 +6,41 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { qrCodeSrc } from "@point_of_sale/utils";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { rpc } from "@web/core/network/rpc";
-
+import { useService } from "@web/core/utils/hooks";
+import { onWillUnmount, onWillStart } from "@odoo/owl";
 import { user } from "@web/core/user";
 patch(PaymentScreen.prototype, {
   setup() {
     super.setup(...arguments);
-    console.log(this)
+    this.webSocket = useService("webSocket");
+    this.notification = useService("notification");
+
+    onWillStart(async () => await this.initialize());
+    onWillUnmount(this.webSocket.disconnect);
   },
- 
+  async initialize() {
+    this.webSocket.connect();
+    this.webSocket.onMessage(this.handleWebSocketMessage.bind(this));
+  },
+  async handleWebSocketMessage(e) {
+    try {
+      console.log(e.data);
+      this.notification.add(_t(e.data), {
+        type: "success",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
   getVNPayExpDate() {
     // Create expiration date 15 minutes from now
     const now = new Date();
     now.setMinutes(now.getMinutes() + 16);
-
     const year = now.getFullYear().toString().slice(-2);
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
-
     return `${year}${month}${day}${hours}${minutes}`;
   },
   getVNPayExpDateFull() {
@@ -381,6 +397,13 @@ patch(PaymentScreen.prototype, {
     await this.postPushOrderResolve([this.currentOrder.server_id]);
 
     this.afterOrderValidation(true);
+  },
+
+  async afterOrderValidation(suggestToSync = true) {
+    if (this.webSocket.isConnect() == 1) {
+      this.webSocket.send("Gửi lệnh In");
+    }
+    return await super.afterOrderValidation(...arguments);
   },
   checkRemainingOnlinePaymentLines_2(unpaidAmount) {
     const remainingLines = this.getRemainingOnlinePaymentLines();

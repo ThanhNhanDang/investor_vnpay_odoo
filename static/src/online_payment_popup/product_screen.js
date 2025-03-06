@@ -37,8 +37,6 @@ patch(ProductScreen.prototype, {
   setup() {
     super.setup(...arguments);
     this.numberBuffer = useService("custom_number_buffer");
-    this.webSocket = useService("webSocket");
-    onWillStart(async () => await this.initialize());
 
     onMounted(() => {
       this.pos.openOpeningControl();
@@ -48,22 +46,12 @@ patch(ProductScreen.prototype, {
       // the callbacks in `onMounted` hook.
       this.numberBuffer.reset();
     });
-    onWillUnmount(this.webSocket.disconnect);
+    
     this.numberBuffer.use({
       useWithBarcode: true,
     });
   },
-  async initialize() {
-    this.webSocket.connect();
-    this.webSocket.onMessage(this.handleWebSocketMessage.bind(this));
-  },
-  async handleWebSocketMessage(e) {
-    try {
-      console.log(e.data);
-    } catch (error) {
-      console.log(error);
-    }
-  },
+  
   onNumpadClick(buttonValue) {
     if (["quantity", "discount", "price"].includes(buttonValue)) {
       this.numberBuffer.capture();
