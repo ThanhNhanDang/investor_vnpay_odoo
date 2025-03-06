@@ -8,7 +8,7 @@ import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 import { formatDateTime } from "@web/core/l10n/dates";
-import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
+import { CustomPrintOrderReceipt } from "./custom_print_order_receipt";
 import { onWillUnmount, onWillStart } from "@odoo/owl";
 import { ReceiptScreen } from "@point_of_sale/app/screens/receipt_screen/receipt_screen";
 const { DateTime } = luxon;
@@ -430,7 +430,7 @@ patch(PaymentScreen.prototype, {
     //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
     // link.download = `${companyName}-${currentDate}.png`;
     const png = await this.renderer.toCanvas(
-      OrderReceipt,
+      CustomPrintOrderReceipt,
       {
         data: this.pos.orderExportForPrinting(order),
         formatCurrency: this.formatMonetary.bind(this),
