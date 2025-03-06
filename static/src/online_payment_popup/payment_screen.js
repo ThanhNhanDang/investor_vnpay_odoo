@@ -7,14 +7,25 @@ import { qrCodeSrc } from "@point_of_sale/utils";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
+import { formatDateTime } from "@web/core/l10n/dates";
+import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
 import { onWillUnmount, onWillStart } from "@odoo/owl";
+import { ReceiptScreen } from "@point_of_sale/app/screens/receipt_screen/receipt_screen";
+const { DateTime } = luxon;
+import { formatCurrency as webFormatCurrency } from "@web/core/currency";
+
 import { user } from "@web/core/user";
 patch(PaymentScreen.prototype, {
+  formatMonetary(price) {
+    return webFormatCurrency(price, this.currency.id);
+  },
   setup() {
     super.setup(...arguments);
+    this.config = this.pos.models["pos.config"].getFirst();
+    this.currency = this.config.currency_id;
     this.webSocket = useService("webSocket");
     this.notification = useService("notification");
-
+    this.renderer = useService("renderer");
     onWillStart(async () => await this.initialize());
     onWillUnmount(this.webSocket.disconnect);
   },
@@ -400,11 +411,54 @@ patch(PaymentScreen.prototype, {
   },
 
   async afterOrderValidation(suggestToSync = true) {
-    if (this.webSocket.isConnect() == 1) {
-      this.webSocket.send("Gửi lệnh In");
-    }
+    this.downloadReceipt();
     return await super.afterOrderValidation(...arguments);
   },
+
+  convertImageToBitmap(imageDataUrl, width, height) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Lấy dữ liệu pixel từ canvas
+        const imageData = ctx.getImageData(0, 0, width, height);
+        resolve(imageData); // Dữ liệu bitmap (Uint8ClampedArray)
+      };
+      img.onerror = reject;
+      img.src = imageDataUrl;
+    });
+  },
+
+  async downloadReceipt() {
+    if (this.webSocket.isConnect() == 1) {
+      const order = this.pos.models["pos.order"].getBy(
+        "uuid",
+        this.currentOrder.uuid
+      );
+      order.tracking_number = "S" + order.tracking_number;
+
+      // Tạo canvas từ receipt
+      const canvas = await this.renderer.toCanvas(
+        OrderReceipt,
+        {
+          data: this.pos.orderExportForPrinting(order),
+          formatCurrency: this.formatMonetary.bind(this),
+        },
+        {}
+      );
+
+      // Chuyển canvas thành base64
+      const base64Image = canvas.toDataURL("image/png").split(";base64,")[1];
+      this.webSocket.send(base64Image);
+    }
+  },
+
   checkRemainingOnlinePaymentLines_2(unpaidAmount) {
     const remainingLines = this.getRemainingOnlinePaymentLines();
     let remainingAmount = 0;
