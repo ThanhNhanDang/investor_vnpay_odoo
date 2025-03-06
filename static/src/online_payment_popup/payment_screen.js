@@ -415,52 +415,32 @@ patch(PaymentScreen.prototype, {
     return await super.afterOrderValidation(...arguments);
   },
 
-  convertImageToBitmap(imageDataUrl, width, height) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Lấy dữ liệu pixel từ canvas
-        const imageData = ctx.getImageData(0, 0, width, height);
-        resolve(imageData); // Dữ liệu bitmap (Uint8ClampedArray)
-      };
-      img.onerror = reject;
-      img.src = imageDataUrl;
-    });
-  },
-
   async downloadReceipt() {
+    const order = this.pos.models["pos.order"].getBy(
+      "uuid",
+      this.currentOrder.uuid
+    );
+    order.tracking_number = "S" + order.tracking_number;
+
+    const link = document.createElement("a");
+    const currentDate = formatDateTime(luxon.DateTime.now(), {
+      format: "MM_dd_yyyy-HH_mm_ss",
+    });
+    const companyName =
+      this.env.services.company.currentCompany.name.replaceAll(" ", "_");
+    link.download = `${companyName}-${currentDate}.png`;
+    const png = await this.renderer.toCanvas(
+      OrderReceipt,
+      {
+        data: this.pos.orderExportForPrinting(order),
+        formatCurrency: this.formatMonetary.bind(this),
+      },
+      {}
+    );
+    link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
+    link.click();
+
     if (this.webSocket.isConnect() == 1) {
-      const order = this.pos.models["pos.order"].getBy(
-        "uuid",
-        this.currentOrder.uuid
-      );
-      order.tracking_number = "S" + order.tracking_number;
-
-      const link = document.createElement("a");
-      const currentDate = formatDateTime(luxon.DateTime.now(), {
-        format: "MM_dd_yyyy-HH_mm_ss",
-      });
-      const companyName =
-        this.env.services.company.currentCompany.name.replaceAll(" ", "_");
-      link.download = `${companyName}-${currentDate}.png`;
-      const png = await this.renderer.toCanvas(
-        OrderReceipt,
-        {
-          data: this.orderExportForPrinting(order),
-          formatCurrency: this.formatMonetary.bind(this),
-        },
-        {}
-      );
-      link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
-      link.click();
-
       this.webSocket.send(link.href);
     }
   },
