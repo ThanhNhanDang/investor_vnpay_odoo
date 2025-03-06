@@ -2,7 +2,7 @@ import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/
 
 import { patch } from "@web/core/utils/patch";
 patch(OrderReceipt, {
-    template: "custom_print.OrderReceipt",
+    template: "custom_point_of_sale.OrderReceipt",
   // setup() {
   //   if (!this.props.onClick) {
   //     this.numberBuffer = useService("custom_number_buffer");
