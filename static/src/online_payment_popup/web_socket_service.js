@@ -2,6 +2,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import { _t } from "@web/core/l10n/translation";
 
 export const webSocketService = {
   dependencies: ["notification", "dialog"],
