@@ -443,19 +443,25 @@ patch(PaymentScreen.prototype, {
       );
       order.tracking_number = "S" + order.tracking_number;
 
-      // Tạo canvas từ receipt
-      const canvas = await this.renderer.toCanvas(
+      const link = document.createElement("a");
+      const currentDate = formatDateTime(luxon.DateTime.now(), {
+        format: "MM_dd_yyyy-HH_mm_ss",
+      });
+      const companyName =
+        this.env.services.company.currentCompany.name.replaceAll(" ", "_");
+      link.download = `${companyName}-${currentDate}.png`;
+      const png = await this.renderer.toCanvas(
         OrderReceipt,
         {
-          data: this.pos.orderExportForPrinting(order),
+          data: this.orderExportForPrinting(order),
           formatCurrency: this.formatMonetary.bind(this),
         },
         {}
       );
+      link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
+      link.click();
 
-      // Chuyển canvas thành base64
-      const base64Image = canvas.toDataURL("image/png").split(";base64,")[1];
-      this.webSocket.send(base64Image);
+      this.webSocket.send(link.href);
     }
   },
 
