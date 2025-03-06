@@ -5,7 +5,7 @@ import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product
 import { useBarcodeReader } from "@point_of_sale/app/barcode/barcode_reader_hook";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
-import { onMounted, useState } from "@odoo/owl";
+import { onMounted, useState, onWillUnmount, onWillStart } from "@odoo/owl";
 import {
   BACKSPACE,
   DEFAULT_LAST_ROW,
@@ -37,6 +37,9 @@ patch(ProductScreen.prototype, {
   setup() {
     super.setup(...arguments);
     this.numberBuffer = useService("custom_number_buffer");
+    this.webSocket = useService("webSocket");
+    onWillStart(async () => await this.initialize());
+
     onMounted(() => {
       this.pos.openOpeningControl();
       this.pos.addPendingOrder([this.currentOrder.id]);
@@ -45,9 +48,21 @@ patch(ProductScreen.prototype, {
       // the callbacks in `onMounted` hook.
       this.numberBuffer.reset();
     });
+    onWillUnmount(this.webSocket.disconnect);
     this.numberBuffer.use({
       useWithBarcode: true,
     });
+  },
+  async initialize() {
+    this.webSocket.connect();
+    this.webSocket.onMessage(this.handleWebSocketMessage.bind(this));
+  },
+  async handleWebSocketMessage(e) {
+    try {
+      console.log(e.data);
+    } catch (error) {
+      console.log(error);
+    }
   },
   onNumpadClick(buttonValue) {
     if (["quantity", "discount", "price"].includes(buttonValue)) {
