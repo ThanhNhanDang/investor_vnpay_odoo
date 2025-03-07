@@ -38,6 +38,7 @@ patch(PaymentScreen.prototype, {
       console.log(e.data);
       this.notification.add(_t(e.data), {
         type: "success",
+        sticky: true,
       });
     } catch (error) {
       console.log(error);
@@ -429,7 +430,7 @@ patch(PaymentScreen.prototype, {
     // const companyName =
     //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
     // link.download = `${companyName}-${currentDate}.png`;
-    const png = await this.renderer.toCanvas(
+    const Jpeg = await this.renderer.toJpeg(
       CustomPrintOrderReceipt,
       {
         data: this.pos.orderExportForPrinting(order),
@@ -441,7 +442,7 @@ patch(PaymentScreen.prototype, {
     // link.click();
 
     if (this.webSocket.isConnect() == 1) {
-      this.webSocket.send(png.toDataURL("image/png").split(";base64,")[1]);
+      this.webSocket.send(Jpeg);
       this.notification.add(_t("Gửi thành công"), {
         type: "success",
       });
