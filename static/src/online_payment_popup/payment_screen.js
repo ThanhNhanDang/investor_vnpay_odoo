@@ -35,10 +35,8 @@ patch(PaymentScreen.prototype, {
   },
   async handleWebSocketMessage(e) {
     try {
-      console.log(e.data);
       this.notification.add(_t(e.data), {
         type: "success",
-        sticky: true,
       });
     } catch (error) {
       console.log(error);
@@ -412,7 +410,7 @@ patch(PaymentScreen.prototype, {
   },
 
   async afterOrderValidation(suggestToSync = true) {
-    await this.downloadReceipt();
+    this.downloadReceipt();
     return await super.afterOrderValidation(...arguments);
   },
 
@@ -430,22 +428,44 @@ patch(PaymentScreen.prototype, {
     // const companyName =
     //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
     // link.download = `${companyName}-${currentDate}.png`;
+    const data = this.pos.orderExportForPrinting(order);
     const Jpeg = await this.renderer.toJpeg(
       CustomPrintOrderReceipt,
       {
-        data: this.pos.orderExportForPrinting(order),
+        data: data,
         formatCurrency: this.formatMonetary.bind(this),
       },
       {}
     );
     // link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
     // link.click();
-
+    console.log(data);
     if (this.webSocket.isConnect() == 1) {
-      this.webSocket.send(Jpeg);
-      this.notification.add(_t("Gửi thành công"), {
-        type: "success",
+      this.webSocket.send(
+        JSON.stringify({
+          type: "PRINT_RECEIPT",
+          image: Jpeg,
+        })
+      );
+      data.orderlines.forEach((element) => {
+        const element_qty = parseInt(element.qty);
+        for (let i = 0; i < element_qty; i++) {
+          this.webSocket.send(
+            JSON.stringify({
+              type: "PRINT_LABEL",
+              text: element.productName+" \n "+ element.customerNote!== ""?element.customerNote:"",
+              position:1
+            })
+          );
+        }
       });
+      this.webSocket.send(
+        JSON.stringify({
+          type: "PRINT_LABEL",
+          text: "",
+          position:0
+        })
+      );
     }
   },
 
