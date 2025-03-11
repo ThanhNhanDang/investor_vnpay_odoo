@@ -414,6 +414,25 @@ patch(PaymentScreen.prototype, {
     return await super.afterOrderValidation(...arguments);
   },
 
+  drawTextOnCanvas(text) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 50;
+    canvas.height = 30;
+    const ctx = canvas.getContext("2d");
+
+    // Đổ nền trắng
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Cài đặt font chữ Tiếng Việt
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial"; // Chọn font hỗ trợ Unicode
+    ctx.fillText(text, 10, 10);
+    return canvas
+      .toDataURL("image/jpeg")
+      .replace("data:image/jpeg;base64,", "");
+  },
+
   async downloadReceipt() {
     const order = this.pos.models["pos.order"].getBy(
       "uuid",
@@ -454,9 +473,10 @@ patch(PaymentScreen.prototype, {
           this.webSocket.send(
             JSON.stringify({
               type: "PRINT_LABEL",
-              text:
+              text: this.drawTextOnCanvas(
                 element.full_product_name +
-                (!element.note ? "" : " " + element.note),
+                  (!element.note ? "" : " " + element.note)
+              ),
               position: position,
             })
           );
