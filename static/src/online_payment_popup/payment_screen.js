@@ -495,7 +495,7 @@ patch(PaymentScreen.prototype, {
           this.webSocket.send(
             JSON.stringify({
               type: "PRINT_LABEL",
-              tex:this.drawTextOnCanvas(
+              text:this.drawTextOnCanvas(
                 element.full_product_name,
                 !element.note ? "" : " " + element.note
               ),
