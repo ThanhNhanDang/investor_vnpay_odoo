@@ -428,6 +428,30 @@ patch(PaymentScreen.prototype, {
     // const companyName =
     //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
     // link.download = `${companyName}-${currentDate}.png`;
+    let position = 0;
+
+    order.lines.forEach((element) => {
+      const element_qty = parseInt(element.qty);
+      for (let i = 0; i < element_qty; i++) {
+        console.log(
+          JSON.stringify({
+            type: "PRINT_LABEL",
+            text:
+              element.full_product_name +
+              (!element.note ? "" : " " + element.note),
+            position: position,
+          })
+        );
+        position++;
+      }
+    });
+    console.log(
+      JSON.stringify({
+        type: "PRINT_LABEL",
+        text: "",
+        position: -1,
+      })
+    );
     const data = this.pos.orderExportForPrinting(order);
     const Jpeg = await this.renderer.toJpeg(
       CustomPrintOrderReceipt,
@@ -439,7 +463,7 @@ patch(PaymentScreen.prototype, {
     );
     // link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
     // link.click();
-    console.log(data);
+
     if (this.webSocket.isConnect() == 1) {
       this.webSocket.send(
         JSON.stringify({
@@ -447,23 +471,28 @@ patch(PaymentScreen.prototype, {
           image: Jpeg,
         })
       );
-      data.orderlines.forEach((element) => {
+      let position = 0;
+      order.lines.forEach((element) => {
         const element_qty = parseInt(element.qty);
         for (let i = 0; i < element_qty; i++) {
           this.webSocket.send(
             JSON.stringify({
               type: "PRINT_LABEL",
-              text: element.productName+" \n "+ element.customerNote!== ""?element.customerNote:"",
-              position:1
+              text:
+                element.full_product_name + " \n " + !element.note
+                  ? ""
+                  : element.note,
+              position: position,
             })
           );
+          position++;
         }
       });
       this.webSocket.send(
         JSON.stringify({
           type: "PRINT_LABEL",
           text: "",
-          position:0
+          position: -1,
         })
       );
     }
