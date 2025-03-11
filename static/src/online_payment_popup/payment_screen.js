@@ -478,23 +478,6 @@ patch(PaymentScreen.prototype, {
       },
       {}
     );
-    let position = 0;
-
-    order.lines.forEach((element) => {
-      const element_qty = parseInt(element.qty);
-      for (let i = 0; i < element_qty; i++) {
-        console.log(element.note);
-        JSON.stringify({
-          type: "PRINT_LABEL",
-          text: this.drawTextOnCanvas(
-            element.full_product_name,
-            !element.note ? "" : " " + element.note
-          ),
-          position: position,
-        });
-        position++;
-      }
-    });
     // link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
     // link.click();
 
@@ -512,9 +495,9 @@ patch(PaymentScreen.prototype, {
           this.webSocket.send(
             JSON.stringify({
               type: "PRINT_LABEL",
-              text: this.drawTextOnCanvas(
-                element.full_product_name +
-                  (!element.note ? "" : " " + element.note)
+              tex:this.drawTextOnCanvas(
+                element.full_product_name,
+                !element.note ? "" : " " + element.note
               ),
               position: position,
             })
