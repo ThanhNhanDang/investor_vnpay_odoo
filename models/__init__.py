@@ -6,3 +6,4 @@ from . import pos_payment_method
 from . import account_move
 from . import payment_transaction
 from . import pos_session
+from . import stock_quant

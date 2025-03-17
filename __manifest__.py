@@ -22,6 +22,9 @@
     'application': True,
     'data': [
         "views/menu_item.xml",
+        "views/stock_quant.xml",
+        "views/product_view.xml",
+        
         "views/payment_vnpay_view.xml",
         "views/payment_vnpay_template.xml",
         "data/payment_method_data.xml",

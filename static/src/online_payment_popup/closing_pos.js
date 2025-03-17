@@ -17,15 +17,31 @@ patch(ClosePosPopup.prototype, {
   async checkInventory() {
     const data = await this.orm.call(
       "stock.quant",
-      "action_view_inventory",
-      [],
+      "action_view_inventory_custom",
+      [this.pos.session.id, false, false],
       {}
     );
     await this.action.doAction(
       { ...data, target: "new" },
       {
         onClose: (e) => {
-          console.log(e)
+          console.log(e);
+        },
+      }
+    );
+  },
+  async checkDevice() {
+    const data = await this.orm.call(
+      "stock.quant",
+      "action_view_inventory_custom",
+      [this.pos.session.id, true, false],
+      {}
+    );
+    await this.action.doAction(
+      { ...data, target: "new" },
+      {
+        onClose: (e) => {
+          console.log(e);
         },
       }
     );
@@ -34,12 +50,19 @@ patch(ClosePosPopup.prototype, {
     const data = await this.orm.searchRead(
       "pos.session",
       [["id", "=", this.pos.session.id]],
-      ["isCheckInventory"]
+      ["isCheckDeviceClose", "isCheckInventoryClose"]
     );
-    if (!data[0].isCheckInventory) {
+    if (!data[0].isCheckInventoryClose) {
       this.dialog.add(AlertDialog, {
         title: _t("Closing session error"),
-        body: _t("Chưa tiến hành kiểm kê kho!!"),
+        body: _t("Chưa tiến hành kiểm kê tồn kho!!"),
+      });
+      return;
+    }
+    if (!data[0].isCheckDeviceClose) {
+      this.dialog.add(AlertDialog, {
+        title: _t("Closing session error"),
+        body: _t("Chưa tiến hành kiểm kê thiết bị!!"),
       });
       return;
     }

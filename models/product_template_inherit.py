@@ -5,3 +5,4 @@ _logger = logging.getLogger(__name__)
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
     color_background = fields.Char(string="Màu nền gói tiền")
+    is_device = fields.Boolean(string="Thiết bị POS")

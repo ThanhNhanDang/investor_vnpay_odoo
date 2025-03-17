@@ -10,8 +10,17 @@ from odoo.exceptions import ValidationError
 class PosSession(models.Model):
     _inherit = "pos.session"
     
-    isCheckInventory = fields.Boolean(
+    isCheckInventoryClose = fields.Boolean(
         string="Kiểm tồn kho"
+    )
+    isCheckDeviceClose = fields.Boolean(
+        string="Kiểm tra thiết bị"
+    )
+    isCheckInventoryOpen = fields.Boolean(
+        string="Kiểm tồn kho"
+    )
+    isCheckDeviceOpen = fields.Boolean(
+        string="Kiểm tra thiết bị"
     )
     def write(self, vals):
         _logger.info(vals)
