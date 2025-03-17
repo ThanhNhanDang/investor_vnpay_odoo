@@ -417,7 +417,7 @@ patch(PaymentScreen.prototype, {
   drawTextOnCanvas(full_product_name, note) {
     const canvas = document.createElement("canvas");
     canvas.width = 400; // Tăng chiều rộng để rõ hơn khi in
-    canvas.height = 240; // Tăng chiều cao để phù hợp
+    canvas.height = 200; // Tăng chiều cao để phù hợp
     const ctx = canvas.getContext("2d");
 
     // Đổ nền trắng
@@ -426,29 +426,30 @@ patch(PaymentScreen.prototype, {
 
     // Cài đặt font chữ Tiếng Việt
     ctx.fillStyle = "black";
-    ctx.font = "18px Arial"; // Chọn font hỗ trợ Unicode
+    ctx.font = "30px Arial"; // Chọn font hỗ trợ Unicode
     ctx.textAlign = "left";
-    const lineHeight = 30; // Khoảng cách giữa các dòng
+    const lineHeight = 40; // Khoảng cách giữa các dòng
     const bullet = "• "; // Dấu chấm đầu dòng
     const startX = 20; // Tọa độ X bắt đầu
     const startY = 40; // Tọa độ Y bắt đầu
     ctx.fillText(full_product_name, startX, 20);
-    note=note.trimStart();
+    note = note.trimStart();
     const lines = note.split("\n").filter((line) => line.trim() !== ""); // Loại bỏ dòng trống
     // Vẽ từng dòng với dấu chấm đầu dòng
     lines.forEach((line, index) => {
       const bulletText = bullet + line;
       ctx.fillText(bulletText, startX, startY + index * lineHeight);
     });
-    const link = document.createElement("a");
-    const currentDate = formatDateTime(luxon.DateTime.now(), {
-      format: "MM_dd_yyyy-HH_mm_ss",
-    });
-    const companyName =
-      this.env.services.company.currentCompany.name.replaceAll(" ", "_");
-    link.download = `${companyName}-${currentDate}.png`;
-    link.href = canvas.toDataURL().replace("data:image/jpeg;base64,", "");
-    link.click();
+    
+    // const link = document.createElement("a");
+    // const currentDate = formatDateTime(luxon.DateTime.now(), {
+    //   format: "MM_dd_yyyy-HH_mm_ss",
+    // });
+    // const companyName =
+    //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
+    // link.download = `${companyName}-${currentDate}.png`;
+    // link.href = canvas.toDataURL().replace("data:image/jpeg;base64,", "");
+    // link.click();
 
     return canvas
       .toDataURL("image/jpeg")
@@ -461,7 +462,18 @@ patch(PaymentScreen.prototype, {
       this.currentOrder.uuid
     );
     order.tracking_number = "S" + order.tracking_number;
-
+    // const newLocal = order.lines.forEach((element) => {
+    //   const element_qty = parseInt(element.qty);
+    //   for (let i = 0; i < element_qty; i++) {
+    //     JSON.stringify({
+    //       type: "PRINT_LABEL",
+    //       text: this.drawTextOnCanvas(
+    //         element.full_product_name,
+    //         !element.note ? "" : " " + element.note
+    //       ),
+    //     });
+    //   }
+    // });
     // const link = document.createElement("a");
     // const currentDate = formatDateTime(luxon.DateTime.now(), {
     //   format: "MM_dd_yyyy-HH_mm_ss",
@@ -495,7 +507,7 @@ patch(PaymentScreen.prototype, {
           this.webSocket.send(
             JSON.stringify({
               type: "PRINT_LABEL",
-              text:this.drawTextOnCanvas(
+              text: this.drawTextOnCanvas(
                 element.full_product_name,
                 !element.note ? "" : " " + element.note
               ),
