@@ -115,6 +115,9 @@ class VNPayController(http.Controller):
             # })
           
             # Gửi thông báo qua Bus
+            ids = data.get("productId").split("_")
+            transaction = self._create_transaction(data.get("amount"), ids[0], data.get("txnId"), ids[1], ids[2], data.get("qrTrace"))
+            transaction._process_pos_online_payment()
             request.env['bus.bus']._sendone(
                 f"vnpay_payment_{data.get('txnId')}",
                 'payment_vnpayQR_update',

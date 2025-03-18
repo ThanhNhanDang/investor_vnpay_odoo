@@ -266,15 +266,6 @@ patch(PaymentScreen.prototype, {
                   if (event.data.txnId === vnpayData.order_reference) {
                     if (event.data.status === "done") {
                       onlinePaymentLine.paymentCompleted = true;
-
-                      await rpc("/api/vnpay-qr/create-transaction", {
-                        amount: onlinePaymentLine.get_amount(),
-                        partner_id: user.partnerId,
-                        company_id: this.env.services.company.currentCompany.id,
-                        txnId: event.data.txnId,
-                        pos_order_id: this.currentOrder.id,
-                        qrTrace: event.data.qrTrace,
-                      });
                       resolve(true);
                     } else if (data.status === "error") {
                       console.error(
@@ -440,7 +431,7 @@ patch(PaymentScreen.prototype, {
       const bulletText = bullet + line;
       ctx.fillText(bulletText, startX, startY + index * lineHeight);
     });
-    
+
     // const link = document.createElement("a");
     // const currentDate = formatDateTime(luxon.DateTime.now(), {
     //   format: "MM_dd_yyyy-HH_mm_ss",
