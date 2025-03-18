@@ -363,7 +363,7 @@ class PaymentProviderVNPay(models.Model):
             "merchantCode": provider.vnpay_merchant_code,
             "terminalId": provider.vnpay_terminal_id,
             "payType": "03",
-            "productId": f"{partner_id.id}_{company_id.id}_{pos_order_id}",
+            "productId": f"{partner_id}_{company_id}_{pos_order_id}",
             "txnId": reference,
             "amount": str(amount),
             "tipAndFee": "",
