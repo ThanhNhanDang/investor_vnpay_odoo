@@ -22,6 +22,8 @@
     'application': True,
     'data': [
         "views/menu_item.xml",
+        "security/access_user.xml",
+        "security/ir.model.access.csv",
         "views/stock_quant.xml",
         "views/product_view.xml",
         "views/payment_vnpay_view.xml",
