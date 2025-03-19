@@ -53,7 +53,7 @@ class StockQuant(models.Model):
         ctx = dict(self.env.context or {}, default_quant_ids=all_quant_ids)
         ctx['is_device']
         missing_quants = quant_ids.filtered(
-            lambda q: ((not q.inventory_quantity_set or not q.inventory_quantity) and (q.is_device == ctx['is_device']))
+            lambda q: ((not q.inventory_quantity_set) and (q.is_device == ctx['is_device']))
         )
         
         # Lấy danh sách tên sản phẩm còn thiếu

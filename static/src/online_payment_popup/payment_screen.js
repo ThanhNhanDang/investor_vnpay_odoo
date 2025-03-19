@@ -99,9 +99,8 @@ patch(PaymentScreen.prototype, {
     const expDate = this.getVNPayExpDate();
     const expDateFull = this.getVNPayExpDateFull();
     const order_reference =
-      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${
-        this.currentOrder.id
-      }${paymentLine.payment_method_id.id}`.substring(0, 15);
+      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${this.currentOrder.id
+        }${paymentLine.payment_method_id.id}`.substring(0, 15);
     try {
       const response = await this.env.services.orm.call(
         "payment.provider",
@@ -152,6 +151,24 @@ patch(PaymentScreen.prototype, {
     const hours = expDateString.slice(6, 8);
     const minutes = expDateString.slice(8, 10);
     return `${hours} giờ:${minutes} phút`;
+  },
+
+  async printQRCode(onlinePaymentData) {
+    const link = document.createElement("a");
+    const currentDate = formatDateTime(luxon.DateTime.now(), {
+      format: "MM_dd_yyyy-HH_mm_ss",
+    });
+    const companyName =
+      this.env.services.company.currentCompany.name.replaceAll(" ", "_");
+    link.download = `${companyName}-${currentDate}.png`;
+    const data = this.pos.orderExportForPrinting(order);
+    const Jpeg = await this.renderer.toJpeg(
+      OnlinePaymentPopup,
+      onlinePaymentData,
+      {}
+    );
+    link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
+    link.click();
   },
 
   //@override
@@ -257,6 +274,9 @@ patch(PaymentScreen.prototype, {
                 },
               }
             );
+
+            this.printQRCode(onlinePaymentData)
+
 
             const paymentResult = await new Promise((resolve) => {
               onlinePaymentLine.onlinePaymentResolver = resolve;
