@@ -208,7 +208,9 @@ class VNPayController(http.Controller):
         transaction = transaction_obj.search([
                 ('reference', '=',reference),
             ], limit=1)
+        _logger.info(partner_id)
         _logger.info(company_id)
+        _logger.info(pos_order_id)
         if not transaction:
             transaction_vals = {
                 'amount': float(amount),
