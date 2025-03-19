@@ -55,7 +55,7 @@ patch(ClosePosPopup.prototype, {
     if (!data[0].isCheckInventoryClose) {
       this.dialog.add(AlertDialog, {
         title: _t("Closing session error"),
-        body: _t("Chưa tiến hành kiểm kê tồn kho!!"),
+        body: _t("Chưa tiến hành kiểm kê công cụ dụng cụ!!"),
       });
       return;
     }

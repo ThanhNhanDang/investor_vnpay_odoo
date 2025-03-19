@@ -53,7 +53,7 @@ class StockQuant(models.Model):
         ctx = dict(self.env.context or {}, default_quant_ids=all_quant_ids)
         ctx['is_device']
         missing_quants = quant_ids.filtered(
-            lambda q: ((not q.inventory_quantity_set or not q.inventory_quantity or q.inventory_quantity == 0) and (q.is_device == ctx['is_device']))
+            lambda q: ((not q.inventory_quantity_set or not q.inventory_quantity) and (q.is_device == ctx['is_device']))
         )
         
         # Lấy danh sách tên sản phẩm còn thiếu
@@ -113,7 +113,7 @@ class StockQuant(models.Model):
             ctx['search_default_my_count'] = True
         view_id = self.env.ref('investor_vnpay_odoo.custom_view_stock_quant_tree_inventory_editable').id
         action = {
-            'name': _("Kiểm kê thiết bị") if is_device else _('Kiểm tồn kho'),
+            'name': _("Kiểm kê thiết bị") if is_device else _('Kiểm kê công cụ dụng cụ'),
             'view_mode': 'list',
             'res_model': 'stock.quant',
             'type': 'ir.actions.act_window',

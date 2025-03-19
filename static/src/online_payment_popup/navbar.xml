@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//DropdownItem" position="after">
+            <DropdownItem t-if="!isFullScreen" onSelected="() => goFullScreen()">
+                Full màn hình
+            </DropdownItem>
+            <DropdownItem t-if="isFullScreen" onSelected="() => exitFullScreen()">
+                Thoát Full màn hình
+            </DropdownItem>
+        </xpath>
+    </t>
+</templates>
