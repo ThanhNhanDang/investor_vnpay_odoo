@@ -79,6 +79,7 @@ class StockQuant(models.Model):
         record = super(StockQuant, self).write(vals)
         return record
     def create(self, vals):
+        _logger.info(f"vals: {vals}")
         record = super(StockQuant, self).create(vals)
         if record.product_id.is_device:
             record.write({'is_device':True})  

@@ -25,7 +25,7 @@ class PaymentProviderVNPay(models.Model):
     def _get_default_vnpay_ipn_url(self):
         base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
         return base_url + VNPayController._ipn_url
-
+    
     # Add 'VNPay' as a new payment provider
     code = fields.Selection(
         selection_add=[("vnpay", "VNPay")], ondelete={"vnpay": "set default"}
