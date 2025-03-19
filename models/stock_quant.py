@@ -8,6 +8,7 @@ from markupsafe import escape
 from odoo import _, api, fields, models
 _logger = logging.getLogger(__name__)
 from odoo.exceptions import ValidationError
+from odoo.tools.float_utils import float_compare, float_is_zero
 
 class StockInventoryAdjustmentName(models.TransientModel):
     _inherit = 'stock.inventory.adjustment.name'

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- LƯU Ý: Tạo Group mới không được trùng lặp id và ghi đè lên gourp cũ 
+     ID group quyền (parent) phải khác nhau khi thêm mới -->
+    <record id="cate_groups_investor" model="ir.module.category">
+        <field name="name">MIXDD ROLE</field>
+        <field name="sequence">500</field>
+    </record>
+    <record id="seller" model="res.groups">
+        <field name="name">Seller</field>
+        <field name="category_id"
+            ref="investor_vnpay_odoo.cate_groups_investor" />
+    </record>
+</odoo>
