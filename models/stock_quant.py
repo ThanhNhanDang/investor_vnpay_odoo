@@ -44,7 +44,7 @@ class StockQuant(models.Model):
     )
     inventory_quantity = fields.Float(
         'Counted Quantity', digits='Product Unit of Measure',
-        help="The product's counted quantity.", required=True)
+        help="The product's counted quantity.")
     def action_apply_all_custom(self):
         quant_ids = self.env['stock.quant'].search(self.env.context['active_domain'])
         # Các quant đã có inventory_quantity_set
@@ -95,7 +95,11 @@ class StockQuant(models.Model):
                   'inventory_date', 'user_id', 'inventory_quantity_set', 'is_outdated', 'lot_id',
                   'location_id', 'package_id', "is_device", "is_device_work", "note_device"]
         return fields
-    
+    @api.model
+    def _quant_tasks(self):
+        self._merge_quants()
+        self._clean_reservations()
+
     
     @api.model
     def action_view_inventory_custom(self, pos_session_id, is_device, is_open = True):

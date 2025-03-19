@@ -23,7 +23,5 @@ class PosSession(models.Model):
         string="Kiểm tra thiết bị"
     )
     def write(self, vals):
-        _logger.info(vals)
-                
         record = super(PosSession, self).write(vals)
         return record
