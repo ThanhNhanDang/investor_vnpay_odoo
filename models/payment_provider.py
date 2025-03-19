@@ -275,7 +275,7 @@ class PaymentProviderVNPay(models.Model):
 
     def vnpay_generate_qr(self, amount, reference, expDate, expDateFull, pos_order_id, partner_id, company_id):
         provider = self.sudo().search([('code', '=', 'vnpay')], limit=1)
-
+        reference = f"{partner_id}a{company_id}a{pos_order_id}"
         if int(amount) < 0:
             _logger.info(pos_order_id)
 
@@ -363,7 +363,7 @@ class PaymentProviderVNPay(models.Model):
             "merchantCode": provider.vnpay_merchant_code,
             "terminalId": provider.vnpay_terminal_id,
             "payType": "03",
-            "productId": f"{partner_id}_{company_id}_{pos_order_id}",
+            "productId": "",
             "txnId": reference,
             "amount": str(amount),
             "tipAndFee": "",
