@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="custom_point_of_sale.OrderReceipt">
-        <div class="pos-receipt p-3">
+        <div class="pos-receipt p-3" id="order-receipt-custom">
             <t t-set="showTaxGroupLabels" t-value="doesAnyOrderlineHaveTaxLabel()"/>
             <ReceiptHeader data="props.data.headerData" />
             <OrderWidget t-if="props.data.orderlines?.length" lines="props.data.orderlines" t-slot-scope="scope" generalNote="props.data.generalNote or ''" screenName="props.data.screenName">

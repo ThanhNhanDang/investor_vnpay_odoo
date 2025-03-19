@@ -6,45 +6,46 @@
                 title.translate="Scan to pay" 
                 footer="false" 
                 bodyClass="'w-100 h-100 d-flex flex-column justify-content-center align-items-center'">
+                <div id="qr-code-container" class="w-50 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <!-- Tiêu đề -->
+                    <p class="text-center text-muted mb-3">Scan the QR code to pay</p>
 
-                <!-- Tiêu đề -->
-                <p class="text-center text-muted mb-3">Scan the QR code to pay</p>
-
-                <!-- Khung chứa mã QR -->
-                <div class="qr-code-container shadow rounded p-3 bg-white" 
-                    t-attf-style="
-                        background-image: url('/investor_vnpay_odoo/static/description/qr-frame.png');
-                        background-position: center;
-                        background-repeat: no-repeat;
-                        background-size: contain;
-                        width: 250px; /* Chiều rộng cố định */
-                        height: 250px; /* Chiều cao cố định */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;"
-                >
-                    <img 
-                        class="qr-code" 
-                        t-att-src="props.qrCode" 
-                        alt="QR Code to pay"
-                        style="max-width: 90%; max-height: 90%;" />
-                </div>
-
-                <!-- Thông tin đơn hàng -->
-                <div class="mt-4 text-center">
-                    <div class="amount fw-bold fs-5">
-                        Amount: <t t-esc="props.formattedAmount"/>
+                        <!-- Khung chứa mã QR -->
+                    <div class="qr-code-container shadow rounded p-3 bg-white" 
+                        t-attf-style="
+                            background-image: url('/investor_vnpay_odoo/static/description/qr-frame.png');
+                            background-position: center;
+                            background-repeat: no-repeat;
+                            background-size: contain;
+                            width: 250px; /* Chiều rộng cố định */
+                            height: 250px; /* Chiều cao cố định */
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;"
+                    >
+                        <img 
+                            class="qr-code" 
+                            t-att-src="props.qrCode" 
+                            alt="QR Code to pay"
+                            style="max-width: 90%; max-height: 90%;" />
                     </div>
-                    <div class="order-reference text-muted">
-                        Order reference: <t t-esc="props.orderName"/>
-                    </div>
-                    <!-- <t t-if="props.displayExpTime">
-                        <div class="expiration-time text-muted mt-1">
-                            Thời gian hết hạn: <t t-esc="props.displayExpTime"/> (GMT)
+
+                        <!-- Thông tin đơn hàng -->
+                    <div class="mt-4 text-center">
+                        <div class="amount fw-bold fs-5">
+                            Amount: <t t-esc="props.formattedAmount"/>
                         </div>
-                    </t> -->
-                    <div class="countdown text-warning mt-2">
-                        Thời gian: <t t-esc="this.state.countdown"/>
+                        <div class="order-reference text-muted">
+                            Order reference: <t t-esc="props.orderName"/>
+                        </div>
+                            <!-- <t t-if="props.displayExpTime">
+                            <div class="expiration-time text-muted mt-1">
+                                Thời gian hết hạn: <t t-esc="props.displayExpTime"/> (GMT)
+                            </div>
+                        </t> -->
+                        <div class="countdown text-warning mt-2">
+                            Thời gian: <t t-esc="this.state.countdown"/>
+                        </div>
                     </div>
                 </div>
             </Dialog>

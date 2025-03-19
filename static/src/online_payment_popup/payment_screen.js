@@ -74,7 +74,6 @@ patch(PaymentScreen.prototype, {
   },
 
   async addNewPaymentLine(paymentMethod) {
-    console.log("paymentMethod", paymentMethod);
     if (
       paymentMethod.is_online_payment &&
       typeof this.currentOrder.id === "string"
@@ -100,8 +99,9 @@ patch(PaymentScreen.prototype, {
     const expDate = this.getVNPayExpDate();
     const expDateFull = this.getVNPayExpDateFull();
     const order_reference =
-      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${this.currentOrder.id
-        }${paymentLine.payment_method_id.id}`.substring(0, 15);
+      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${
+        this.currentOrder.id
+      }${paymentLine.payment_method_id.id}`.substring(0, 15);
     try {
       const response = await this.env.services.orm.call(
         "payment.provider",
@@ -154,28 +154,7 @@ patch(PaymentScreen.prototype, {
     return `${hours} giờ:${minutes} phút`;
   },
 
-  async printQRCode(onlinePaymentData) {
-    const order = this.pos.models["pos.order"].getBy(
-      "uuid",
-      this.currentOrder.uuid
-    );
-    order.tracking_number = "S" + order.tracking_number;
-    // const link = document.createElement("a");
-    // const currentDate = formatDateTime(luxon.DateTime.now(), {
-    //   format: "MM_dd_yyyy-HH_mm_ss",
-    // });
-    // const companyName =
-    //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
-    // link.download = `${companyName}-${currentDate}.png`;
-    // const data = this.pos.orderExportForPrinting(order);
-    // const Jpeg = await this.renderer.toJpeg(
-    //   OnlinePaymentPopup,
-    //   onlinePaymentData,
-    //   {}
-    // );
-    // link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
-    // link.click();
-  },
+  
 
   //@override
   async _isOrderValid(isForceValidate) {
@@ -280,8 +259,6 @@ patch(PaymentScreen.prototype, {
                 },
               }
             );
-
-            this.printQRCode(onlinePaymentData)
 
 
             const paymentResult = await new Promise((resolve) => {
@@ -431,56 +408,17 @@ patch(PaymentScreen.prototype, {
     return await super.afterOrderValidation(...arguments);
   },
 
-  drawTextOnCanvas(full_product_name, note) {
-    // const canvas = document.createElement("canvas");
-    // const ctx = canvas.getContext("2d");
-
-    // Cài đặt font chữ Tiếng Việt
-    // ctx.font = "20px Arial"; // Font phải được đặt trước khi đo văn bản
-    const lineHeight = 40; // Khoảng cách giữa các dòng
-    const bullet = "• "; // Dấu chấm đầu dòng
-    const padding = 20; // Khoảng đệm hai bên và trên dưới
-
+  drawTextSendPrintNote(full_product_name, note) {
+    const bullet = "- "; // Dấu - đầu dòng
     // Chuẩn bị các dòng văn bản
     note = note.trimStart();
     const lines = note.split("\n").filter((line) => line.trim() !== "");
     const bulletLines = lines.map((line) => bullet + line + "\n");
+    // Nối các phần tử của bulletLines thành chuỗi không có dấu phẩy
+    const bulletText = bulletLines.join("");
 
-    // // Đo chiều rộng tối đa của văn bản
-    // const textWidths = [
-    //   ctx.measureText(full_product_name).width,
-    //   ...bulletLines.map((line) => ctx.measureText(line).width),
-    // ];
-    // const maxTextWidth = Math.max(...textWidths);
-
-    // // Tính toán kích thước canvas
-    // canvas.width = maxTextWidth + 2 * padding; // Chiều rộng = văn bản dài nhất + padding hai bên
-    // canvas.height = (bulletLines.length + 1) * lineHeight + 2 * padding; // Chiều cao = số dòng * lineHeight + padding trên dưới
-
-    // // Đổ nền trắng
-    // ctx.fillStyle = "white";
-    // ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // // Cài đặt lại font và kiểu chữ (vì canvas đã được resize)
-    // ctx.fillStyle = "black";
-    // ctx.font = "20px Arial";
-    // ctx.textAlign = "left";
-
-    // // Vẽ văn bản
-    // const startX = padding; // Tọa độ X bắt đầu
-    // const startY = padding + 20; // Tọa độ Y bắt đầu (20px là khoảng cách từ trên xuống dòng đầu)
-    // ctx.fillText(full_product_name, startX, startY);
-
-    // // Vẽ từng dòng với dấu chấm đầu dòng
-    // bulletLines.forEach((line, index) => {
-    //   ctx.fillText(line, startX, startY + (index + 1) * lineHeight);
-    // });
-
-    // return canvas
-    //   .toDataURL("image/jpeg")
-    //   .replace("data:image/jpeg;base64,", "");
     return this.removeVietnameseDiacritics(
-      full_product_name + "\n" + bulletLines
+      full_product_name + "\n" + bulletText
     );
   },
   removeVietnameseDiacritics(str) {
@@ -636,37 +574,39 @@ patch(PaymentScreen.prototype, {
       this.currentOrder.uuid
     );
     order.tracking_number = "S" + order.tracking_number;
+
+    // // const link = document.createElement("a");
+    // // const currentDate = formatDateTime(luxon.DateTime.now(), {
+    // //   format: "MM_dd_yyyy-HH_mm_ss",
+    // // });
+    // // const companyName =
+    // //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
+    // // link.download = `${companyName}-${currentDate}.png`;
+    // const data = this.pos.orderExportForPrinting(order);
+    // const Jpeg = await this.renderer.toJpeg(
+    //   CustomPrintOrderReceipt,
+    //   {
+    //     data: data,
+    //     formatCurrency: this.formatMonetary.bind(this),
+    //   },
+    //   {}
+    // );
+    // link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
+    // link.click();
+    const printItems = [];
     const newLocal = order.lines.forEach((element) => {
       const element_qty = parseInt(element.qty);
       for (let i = 0; i < element_qty; i++) {
-        console.log({
-          type: "PRINT_LABEL",
-          text: this.drawTextOnCanvas(
+        const printData = {
+          data: this.drawTextSendPrintNote(
             element.full_product_name,
             !element.note ? "" : " " + element.note
           ),
-        });
+        };
+        printItems.push(printData);
       }
     });
-    // const link = document.createElement("a");
-    // const currentDate = formatDateTime(luxon.DateTime.now(), {
-    //   format: "MM_dd_yyyy-HH_mm_ss",
-    // });
-    // const companyName =
-    //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
-    // link.download = `${companyName}-${currentDate}.png`;
-    const data = this.pos.orderExportForPrinting(order);
-    const Jpeg = await this.renderer.toJpeg(
-      CustomPrintOrderReceipt,
-      {
-        data: data,
-        formatCurrency: this.formatMonetary.bind(this),
-      },
-      {}
-    );
-    // link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
-    // link.click();
-
+    const result = { type: "PRINT_LABEL", datas: printItems };
     if (this.webSocket.isConnect() == 1) {
       // this.webSocket.send(
       //   JSON.stringify({
@@ -674,30 +614,21 @@ patch(PaymentScreen.prototype, {
       //     image: Jpeg,
       //   })
       // );
-      let position = 0;
-      order.lines.forEach((element) => {
+      const printItems = [];
+      const newLocal = order.lines.forEach((element) => {
         const element_qty = parseInt(element.qty);
         for (let i = 0; i < element_qty; i++) {
-          this.webSocket.send(
-            JSON.stringify({
-              type: "PRINT_LABEL",
-              text: this.drawTextOnCanvas(
-                element.full_product_name,
-                !element.note ? "" : " " + element.note
-              ),
-              position: position,
-            })
-          );
-          position++;
+          const printData = {
+            data: this.drawTextSendPrintNote(
+              element.full_product_name,
+              !element.note ? "" : " " + element.note
+            ),
+          };
+          printItems.push(printData);
         }
       });
-      this.webSocket.send(
-        JSON.stringify({
-          type: "PRINT_LABEL",
-          text: "",
-          position: -1,
-        })
-      );
+      const result = { type: "PRINT_LABEL", datas: printItems };
+      this.webSocket.send(JSON.stringify(result));
     }
   },
 
