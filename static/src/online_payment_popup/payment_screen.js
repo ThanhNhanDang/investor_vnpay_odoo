@@ -154,21 +154,21 @@ patch(PaymentScreen.prototype, {
   },
 
   async printQRCode(onlinePaymentData) {
-    const link = document.createElement("a");
-    const currentDate = formatDateTime(luxon.DateTime.now(), {
-      format: "MM_dd_yyyy-HH_mm_ss",
-    });
-    const companyName =
-      this.env.services.company.currentCompany.name.replaceAll(" ", "_");
-    link.download = `${companyName}-${currentDate}.png`;
-    const data = this.pos.orderExportForPrinting(order);
-    const Jpeg = await this.renderer.toJpeg(
-      OnlinePaymentPopup,
-      onlinePaymentData,
-      {}
-    );
-    link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
-    link.click();
+    // const link = document.createElement("a");
+    // const currentDate = formatDateTime(luxon.DateTime.now(), {
+    //   format: "MM_dd_yyyy-HH_mm_ss",
+    // });
+    // const companyName =
+    //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
+    // link.download = `${companyName}-${currentDate}.png`;
+    // const data = this.pos.orderExportForPrinting(order);
+    // const Jpeg = await this.renderer.toJpeg(
+    //   OnlinePaymentPopup,
+    //   onlinePaymentData,
+    //   {}
+    // );
+    // link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
+    // link.click();
   },
 
   //@override

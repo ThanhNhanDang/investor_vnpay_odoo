@@ -95,6 +95,7 @@ class StockQuant(models.Model):
                   'inventory_date', 'user_id', 'inventory_quantity_set', 'is_outdated', 'lot_id',
                   'location_id', 'package_id', "is_device", "is_device_work", "note_device"]
         return fields
+    
     @api.model
     def _quant_tasks(self):
         self._merge_quants()
