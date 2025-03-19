@@ -89,7 +89,7 @@ class VNPayController(http.Controller):
         return {
             'success': True,
         }
-    @http.route('/api/vnpay-ipn/qr', type='http', auth='public', methods=['POST'], csrf=False,
+    @http.route('/api/vnpay-ipn/qr', type='http', auth='public', methods=['GET'], csrf=False,
         save_session=False)
     def process_payment(self):
         data = request.get_json_data()
