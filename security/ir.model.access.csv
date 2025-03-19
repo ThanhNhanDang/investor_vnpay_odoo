@@ -7,4 +7,4 @@ access_seller_ir_data,access_seller_ir_data,base.model_ir_model_data,seller,1,0,
 access_pos_session_seller,access_pos_session_seller,point_of_sale.model_pos_session,seller,1,1,1,0
 
 access_stock_inventory_conflict_seller,access_stock_inventory_conflict_seller,model_stock_inventory_conflict,seller,1,1,1,0
-access_model_stock_quant_seller,access_model_stock_quant_seller,model_stock_quant,seller,1,1,1,0
+access_model_stock_quant_seller,access_model_stock_quant_seller,stock.model_stock_quant,seller,1,1,1,0
