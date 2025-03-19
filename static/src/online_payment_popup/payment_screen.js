@@ -406,45 +406,202 @@ patch(PaymentScreen.prototype, {
   },
 
   drawTextOnCanvas(full_product_name, note) {
-    const canvas = document.createElement("canvas");
-    canvas.width = 400; // Tăng chiều rộng để rõ hơn khi in
-    canvas.height = 200; // Tăng chiều cao để phù hợp
-    const ctx = canvas.getContext("2d");
-
-    // Đổ nền trắng
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // const canvas = document.createElement("canvas");
+    // const ctx = canvas.getContext("2d");
 
     // Cài đặt font chữ Tiếng Việt
-    ctx.fillStyle = "black";
-    ctx.font = "30px Arial"; // Chọn font hỗ trợ Unicode
-    ctx.textAlign = "left";
+    // ctx.font = "20px Arial"; // Font phải được đặt trước khi đo văn bản
     const lineHeight = 40; // Khoảng cách giữa các dòng
     const bullet = "• "; // Dấu chấm đầu dòng
-    const startX = 20; // Tọa độ X bắt đầu
-    const startY = 40; // Tọa độ Y bắt đầu
-    ctx.fillText(full_product_name, startX, 20);
+    const padding = 20; // Khoảng đệm hai bên và trên dưới
+
+    // Chuẩn bị các dòng văn bản
     note = note.trimStart();
-    const lines = note.split("\n").filter((line) => line.trim() !== ""); // Loại bỏ dòng trống
-    // Vẽ từng dòng với dấu chấm đầu dòng
-    lines.forEach((line, index) => {
-      const bulletText = bullet + line;
-      ctx.fillText(bulletText, startX, startY + index * lineHeight);
-    });
+    const lines = note.split("\n").filter((line) => line.trim() !== "");
+    const bulletLines = lines.map((line) => bullet + line + "\n");
 
-    // const link = document.createElement("a");
-    // const currentDate = formatDateTime(luxon.DateTime.now(), {
-    //   format: "MM_dd_yyyy-HH_mm_ss",
+    // // Đo chiều rộng tối đa của văn bản
+    // const textWidths = [
+    //   ctx.measureText(full_product_name).width,
+    //   ...bulletLines.map((line) => ctx.measureText(line).width),
+    // ];
+    // const maxTextWidth = Math.max(...textWidths);
+
+    // // Tính toán kích thước canvas
+    // canvas.width = maxTextWidth + 2 * padding; // Chiều rộng = văn bản dài nhất + padding hai bên
+    // canvas.height = (bulletLines.length + 1) * lineHeight + 2 * padding; // Chiều cao = số dòng * lineHeight + padding trên dưới
+
+    // // Đổ nền trắng
+    // ctx.fillStyle = "white";
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // // Cài đặt lại font và kiểu chữ (vì canvas đã được resize)
+    // ctx.fillStyle = "black";
+    // ctx.font = "20px Arial";
+    // ctx.textAlign = "left";
+
+    // // Vẽ văn bản
+    // const startX = padding; // Tọa độ X bắt đầu
+    // const startY = padding + 20; // Tọa độ Y bắt đầu (20px là khoảng cách từ trên xuống dòng đầu)
+    // ctx.fillText(full_product_name, startX, startY);
+
+    // // Vẽ từng dòng với dấu chấm đầu dòng
+    // bulletLines.forEach((line, index) => {
+    //   ctx.fillText(line, startX, startY + (index + 1) * lineHeight);
     // });
-    // const companyName =
-    //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
-    // link.download = `${companyName}-${currentDate}.png`;
-    // link.href = canvas.toDataURL().replace("data:image/jpeg;base64,", "");
-    // link.click();
 
-    return canvas
-      .toDataURL("image/jpeg")
-      .replace("data:image/jpeg;base64,", "");
+    // return canvas
+    //   .toDataURL("image/jpeg")
+    //   .replace("data:image/jpeg;base64,", "");
+    return this.removeVietnameseDiacritics(
+      full_product_name + "\n" + bulletLines
+    );
+  },
+  removeVietnameseDiacritics(str) {
+    // Bảng ánh xạ ký tự có dấu sang không dấu
+    const map = {
+      à: "a",
+      á: "a",
+      ả: "a",
+      ã: "a",
+      ạ: "a",
+      ă: "a",
+      ằ: "a",
+      ắ: "a",
+      ẳ: "a",
+      ẵ: "a",
+      ặ: "a",
+      â: "a",
+      ầ: "a",
+      ấ: "a",
+      ẩ: "a",
+      ẫ: "a",
+      ậ: "a",
+      è: "e",
+      é: "e",
+      ẻ: "e",
+      ẽ: "e",
+      ẹ: "e",
+      ê: "e",
+      ề: "e",
+      ế: "e",
+      ể: "e",
+      ễ: "e",
+      ệ: "e",
+      ì: "i",
+      í: "i",
+      ỉ: "i",
+      ĩ: "i",
+      ị: "i",
+      ò: "o",
+      ó: "o",
+      ỏ: "o",
+      õ: "o",
+      ọ: "o",
+      ô: "o",
+      ồ: "o",
+      ố: "o",
+      ổ: "o",
+      ỗ: "o",
+      ộ: "o",
+      ơ: "o",
+      ờ: "o",
+      ớ: "o",
+      ở: "o",
+      ỡ: "o",
+      ợ: "o",
+      ù: "u",
+      ú: "u",
+      ủ: "u",
+      ũ: "u",
+      ụ: "u",
+      ư: "u",
+      ừ: "u",
+      ứ: "u",
+      ử: "u",
+      ữ: "u",
+      ự: "u",
+      ỳ: "y",
+      ý: "y",
+      ỷ: "y",
+      ỹ: "y",
+      ỵ: "y",
+      đ: "d",
+      À: "A",
+      Á: "A",
+      Ả: "A",
+      Ã: "A",
+      Ạ: "A",
+      Ă: "A",
+      Ằ: "A",
+      Ắ: "A",
+      Ẳ: "A",
+      Ẵ: "A",
+      Ặ: "A",
+      Â: "A",
+      Ầ: "A",
+      Ấ: "A",
+      Ẩ: "A",
+      Ẫ: "A",
+      Ậ: "A",
+      È: "E",
+      É: "E",
+      Ẻ: "E",
+      Ẽ: "E",
+      Ẹ: "E",
+      Ê: "E",
+      Ề: "E",
+      Ế: "E",
+      Ể: "E",
+      Ễ: "E",
+      Ệ: "E",
+      Ì: "I",
+      Í: "I",
+      Ỉ: "I",
+      Ĩ: "I",
+      Ị: "I",
+      Ò: "O",
+      Ó: "O",
+      Ỏ: "O",
+      Õ: "O",
+      Ọ: "O",
+      Ô: "O",
+      Ồ: "O",
+      Ố: "O",
+      Ổ: "O",
+      Ỗ: "O",
+      Ộ: "O",
+      Ơ: "O",
+      Ờ: "O",
+      Ớ: "O",
+      Ở: "O",
+      Ỡ: "O",
+      Ợ: "O",
+      Ù: "U",
+      Ú: "U",
+      Ủ: "U",
+      Ũ: "U",
+      Ụ: "U",
+      Ư: "U",
+      Ừ: "U",
+      Ứ: "U",
+      Ử: "U",
+      Ữ: "U",
+      Ự: "U",
+      Ỳ: "Y",
+      Ý: "Y",
+      Ỷ: "Y",
+      Ỹ: "Y",
+      Ỵ: "Y",
+      Đ: "D",
+    };
+
+    // Thay thế các ký tự có dấu bằng không dấu
+    return str
+      .split("")
+      .map((char) => map[char] || char) // Nếu không có trong map thì giữ nguyên
+      .join("")
+      .toUpperCase(); // Chuyển thành chữ in hoa
   },
 
   async downloadReceipt() {
@@ -453,18 +610,18 @@ patch(PaymentScreen.prototype, {
       this.currentOrder.uuid
     );
     order.tracking_number = "S" + order.tracking_number;
-    // const newLocal = order.lines.forEach((element) => {
-    //   const element_qty = parseInt(element.qty);
-    //   for (let i = 0; i < element_qty; i++) {
-    //     JSON.stringify({
-    //       type: "PRINT_LABEL",
-    //       text: this.drawTextOnCanvas(
-    //         element.full_product_name,
-    //         !element.note ? "" : " " + element.note
-    //       ),
-    //     });
-    //   }
-    // });
+    const newLocal = order.lines.forEach((element) => {
+      const element_qty = parseInt(element.qty);
+      for (let i = 0; i < element_qty; i++) {
+        console.log({
+          type: "PRINT_LABEL",
+          text: this.drawTextOnCanvas(
+            element.full_product_name,
+            !element.note ? "" : " " + element.note
+          ),
+        });
+      }
+    });
     // const link = document.createElement("a");
     // const currentDate = formatDateTime(luxon.DateTime.now(), {
     //   format: "MM_dd_yyyy-HH_mm_ss",
@@ -485,12 +642,12 @@ patch(PaymentScreen.prototype, {
     // link.click();
 
     if (this.webSocket.isConnect() == 1) {
-      this.webSocket.send(
-        JSON.stringify({
-          type: "PRINT_RECEIPT",
-          image: Jpeg,
-        })
-      );
+      // this.webSocket.send(
+      //   JSON.stringify({
+      //     type: "PRINT_RECEIPT",
+      //     image: Jpeg,
+      //   })
+      // );
       let position = 0;
       order.lines.forEach((element) => {
         const element_qty = parseInt(element.qty);

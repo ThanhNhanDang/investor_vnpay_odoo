@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <t t-inherit="point_of_sale.ClosePosPopup" t-inherit-mode="extension">
         <xpath expr="//div[@class='d-flex gap-2']" position="inside">
-            <button class="button highlight btn btn-primary"  t-on-click="checkInventory" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'">Kiểm Kê Kho</button>
+            <button class="button highlight btn btn-primary"  t-on-click="checkInventory" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'">Kiểm kê công cụ dụng cụ</button>
             <button class="button highlight btn btn-primary"  t-on-click="checkDevice" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'">Kiểm thiết bị</button>
         </xpath>
     </t>

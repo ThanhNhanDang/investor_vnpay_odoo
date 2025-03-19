@@ -53,7 +53,7 @@ patch(OpeningControlPopup.prototype, {
     if (!data[0].isCheckInventoryOpen) {
       this.dialog.add(AlertDialog, {
         title: _t("Lỗi mở phiên"),
-        body: _t("Chưa tiến hành kiểm kê tồn kho!!"),
+        body: _t("Chưa tiến hành kiểm kê công cụ dụng cụ!!"),
       });
       return;
     }
