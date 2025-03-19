@@ -16,14 +16,13 @@
     'summary': 'Module này để cho các nhà đầu tư nạp tiền vào với nhà cung cấp VNPay, và thanh toán bằng VNPay',
     'description': '',
     # 'depends': ["base","product", "investor", "payment"],
-    'depends': ["base","product",  "point_of_sale", "stock", "account_payment"],
+    'depends': ["base","product",  "point_of_sale", "stock", "account_payment", "digest"],
     'installable': True,
     'auto_install': True,
     'application': True,
     'data': [
         "views/menu_item.xml",
         "security/access_user.xml",
-        "security/ir.model.access.csv",
         "views/stock_quant.xml",
         "views/product_view.xml",
         "views/payment_vnpay_view.xml",
@@ -31,6 +30,7 @@
         "data/payment_method_data.xml",
         "data/payment_provider_data.xml",
         "data/pos_payment_method.xml"
+        "security/ir.model.access.csv",
     ],
 
     'assets': {

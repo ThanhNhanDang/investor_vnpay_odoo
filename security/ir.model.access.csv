@@ -2,11 +2,6 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
 access_seller_ir_config_parameter,access_seller_ir_config_parameter,base.model_ir_config_parameter,seller,1,0,0,0
 
-
-access_seller_res_partner,access_seller_res_partner,model_res_partner,seller,1,1,0,0
-
-access_seller_res_users,access_seller_res_users,model_res_users,seller,1,1,0,0
-
 access_seller_ir_data,access_seller_ir_data,base.model_ir_model_data,seller,1,0,0,0
 
 access_pos_session_seller,access_pos_session_seller,point_of_sale.model_pos_session,seller,1,1,1,0
