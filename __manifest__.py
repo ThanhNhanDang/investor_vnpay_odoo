@@ -29,7 +29,7 @@
         "views/payment_vnpay_template.xml",
         "data/payment_method_data.xml",
         "data/payment_provider_data.xml",
-        "data/pos_payment_method.xml"
+        "data/pos_payment_method.xml",
         "security/ir.model.access.csv",
     ],
 
