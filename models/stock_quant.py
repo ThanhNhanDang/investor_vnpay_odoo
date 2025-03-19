@@ -113,7 +113,7 @@ class StockQuant(models.Model):
             ctx['search_default_my_count'] = True
         view_id = self.env.ref('investor_vnpay_odoo.custom_view_stock_quant_tree_inventory_editable').id
         action = {
-            'name': _("Kiểm kê thiết bị") if is_device else _('Kiểm kê công cụ dụng cụ'),
+            'name': _("Kiểm kê thiết bị") if is_device else _('Kiểm kê tồn kho'),
             'view_mode': 'list',
             'res_model': 'stock.quant',
             'type': 'ir.actions.act_window',

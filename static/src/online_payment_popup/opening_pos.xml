@@ -2,8 +2,8 @@
 <templates id="template" xml:space="preserve">
     <t t-inherit="point_of_sale.OpeningControlPopup" t-inherit-mode="extension">
         <xpath expr="//button[@class='button btn btn-lg btn-primary']" position="after">
-            <button class="button highlight btn btn-primary"  t-on-click="checkInventory" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'">Kiểm kê công cụ dụng cụ</button>
-            <button class="button highlight btn btn-primary"  t-on-click="checkDevice" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'">Kiểm thiết bị</button>
+            <button class="button highlight btn btn-primary"  t-on-click="checkInventory" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'">Kiểm kê tồn kho</button>
+            <button class="button highlight btn btn-primary"  t-on-click="checkDevice" t-att-class="this.ui.isSmall ? 'w-100' : 'btn-lg'">Kiểm kê thiết bị</button>
         </xpath>
     </t>
 </templates>
