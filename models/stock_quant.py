@@ -191,6 +191,6 @@ class StockQuant(models.Model):
             'context': ctx,
             'domain': [('location_id.usage', 'in', ['internal', 'transit']), ('is_device', '=', is_device)],
             'views': [(view_id, 'list')],
-            'help': 'Kho của bạn trống. Nhấn nút "Mới" để xác định số lượng sản phẩm trong kho của bạn hoặc nhập số lượng từ bảng tính thông qua menu Hành động',
+            'help': 'Kho của bạn trống.',
         }
         return action

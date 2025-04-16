@@ -53,7 +53,7 @@ patch(OpeningControlPopup.prototype, {
     if (!data[0].isCheckInventoryOpen) {
       this.dialog.add(AlertDialog, {
         title: _t("Lỗi mở phiên"),
-        body: _t("Chưa tiến hành kiểm kê công cụ dụng cụ!!"),
+        body: _t("Chưa tiến hành kiểm kê tồn kho!!"),
       });
       return;
     }
@@ -77,5 +77,16 @@ patch(OpeningControlPopup.prototype, {
     );
     this.pos.session.state = "opened";
     this.props.close();
+    const dialogs = document.getElementsByClassName("o_dialog")
+    for (let i = 0; i < dialogs.length; i++) {
+      dialogs[i].classList.add("d-none");
+    }
+  },
+  showLoginScreen() {
+    const dialogs = document.getElementsByClassName("o_dialog")
+    for (let i = 0; i < dialogs.length; i++) {
+      dialogs[i].classList.add("d-none");
+    }
+    this.pos.showLoginScreen()
   },
 });

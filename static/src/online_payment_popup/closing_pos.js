@@ -8,11 +8,16 @@ import { _t } from "@web/core/l10n/translation";
 import { parseFloat } from "@web/views/fields/parsers";
 import { deduceUrl } from "@point_of_sale/utils";
 import { useService } from "@web/core/utils/hooks";
+import { user } from "@web/core/user";
+
+
+
 patch(ClosePosPopup.prototype, {
   setup() {
     super.setup(...arguments);
     this.orm = useService("orm");
     this.action = useService("action");
+    
   },
   async checkInventory() {
     const data = await this.orm.call(
@@ -55,7 +60,7 @@ patch(ClosePosPopup.prototype, {
     if (!data[0].isCheckInventoryClose) {
       this.dialog.add(AlertDialog, {
         title: _t("Closing session error"),
-        body: _t("Chưa tiến hành kiểm kê công cụ dụng cụ!!"),
+        body: _t("Chưa tiến hành kiểm kê tồn kho!!"),
       });
       return;
     }
@@ -120,7 +125,6 @@ patch(ClosePosPopup.prototype, {
         throw error;
       }
     }
-
     try {
       const bankPaymentMethodDiffPairs = this.props.non_cash_payment_methods
         .filter((pm) => pm.type == "bank")
@@ -138,8 +142,14 @@ patch(ClosePosPopup.prototype, {
       if (!response.successful) {
         return this.handleClosingError(response);
       }
+      // Check if user is in Seller group and log out
       localStorage.removeItem(`pos.session.${odoo.pos_config_id}`);
-      location.reload();
+      const isSeller = await user.hasGroup("investor_vnpay_odoo.seller");
+      if (isSeller) {
+        window.location = "/web/session/logout";
+      } else {
+        location.reload();
+      }
     } catch (error) {
       if (error instanceof ConnectionLostError) {
         throw error;
