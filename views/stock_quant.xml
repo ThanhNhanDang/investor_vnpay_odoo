@@ -71,10 +71,10 @@
                 <field name="quantity" column_invisible="True" optional="show"
                     decoration-warning="quantity &lt; 0"
                     string="On Hand Quantity" />
-                <field name="product_uom_id" column_invisible="True" groups="uom.group_uom"
-                    string="UoM" />
                 <field name="is_device_work" column_invisible="not context.get('is_device')" />
                 <field name="note_device" column_invisible="not context.get('is_device')" />
+                <field name="product_uom_id" column_invisible="False" groups="uom.group_uom"
+                    string="UoM" />
                 <field name="inventory_quantity" widget="counted_quantity_widget"/>
                 <field name="inventory_diff_quantity" column_invisible="True" string="Difference"
                     invisible="not inventory_quantity_set"
