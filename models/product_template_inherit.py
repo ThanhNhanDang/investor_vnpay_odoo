@@ -7,7 +7,7 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
     color_background = fields.Char(string="Màu nền gói tiền")
     is_device = fields.Boolean(string="Thiết bị POS")
-
+    
     def create(self, vals_list):
         res = super(ProductTemplate, self).create(vals_list)
         if res.is_storable:
@@ -16,7 +16,7 @@ class ProductTemplate(models.Model):
             change_product_qty = self.env['stock.change.product.qty'].create({
                 'product_id': default_product_id,
                 'product_tmpl_id': res.id,
-                'new_quantity': 1
+                'new_quantity': 0
             })
             change_product_qty.change_product_qty()
         return res

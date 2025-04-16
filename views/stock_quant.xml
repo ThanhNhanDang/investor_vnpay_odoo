@@ -19,7 +19,7 @@
         <field name="arch" type="xml">
             <list
                 default_order="location_id, inventory_date, product_id, package_id, lot_id, owner_id"
-                decoration-warning='is_outdated' editable="bottom" create="1" edit="1" import="1"
+                decoration-warning='is_outdated' editable="bottom" create="0" edit="1" import="1"
                 js_class="inventory_report_list" sample="1">
                 <header>
                     <button name="action_apply_all_custom" string="Apply All" type="object"

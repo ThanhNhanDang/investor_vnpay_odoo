@@ -139,19 +139,49 @@ class StockQuant(models.Model):
             else:
                 self.env['stock.quant']._update_reserved_quantity(product, location, reserved_quantity, lot_id=lot, package_id=package, owner_id=owner)
     @api.model
-    def action_view_inventory_custom(self, pos_session_id, is_device, is_open = True):
-        """ Similar to _get_quants_action except specific for inventory adjustments (i.e. inventory counts). """
-        self = self._set_view_context()
-        if not self.env['ir.config_parameter'].sudo().get_param('stock.skip_quant_tasks'):
-            self._quant_tasks()
+    def action_view_inventory_custom(self, pos_session_id, is_device, is_open=True):
+        # Step 1: Get storable product templates
+        product_templates = self.env['product.template'].search([('is_storable', '=', True)])
 
+        # Step 2: Get corresponding product variants
+        product_variants = self.env['product.product'].search([('product_tmpl_id', 'in', product_templates.ids)])
+
+        # Step 3: Get existing stock quants for these products
+        stock_quants = self.env['stock.quant'].search([('product_id', 'in', product_variants.ids)])
+
+        # Step 4: Create stock quantities for products without quants
+        products_with_quants = stock_quants.mapped('product_id')
+        products_without_quants = product_variants - products_with_quants
+
+        # Step 5: Create stock quants for products without quants
+        if products_without_quants:
+            default_location = self.env['stock.location'].search([('usage', '=', 'internal')], limit=1)
+            if default_location:
+                for product in products_without_quants:
+                    change_product_qty = self.env['stock.change.product.qty'].create({
+                        'product_id': product.id,
+                        'product_tmpl_id': product.product_tmpl_id.id,  # Correctly reference product template
+                        'new_quantity': 0.0,  # Initial quantity set to 0
+                    })
+                    change_product_qty.change_product_qty()
+
+        # Step 6: Delete stock quants for products without valid storable product templates
+        quants_to_delete = stock_quants.filtered(
+            lambda q: q.product_id.product_tmpl_id not in product_templates
+        )
+        if quants_to_delete:
+            quants_to_delete.unlink()
+        
+        # Step 7: Prepare and return the inventory action
         ctx = dict(self.env.context or {})
         ctx['no_at_date'] = True
         ctx['pos_session_id'] = pos_session_id
         ctx['is_device'] = is_device
         ctx['is_open'] = is_open
+        ctx['inventory_mode'] = True
         if self.env.user.has_group('stock.group_stock_user') and not self.env.user.has_group('stock.group_stock_manager'):
             ctx['search_default_my_count'] = True
+
         view_id = self.env.ref('investor_vnpay_odoo.custom_view_stock_quant_tree_inventory_editable').id
         action = {
             'name': _("Kiểm kê thiết bị") if is_device else _('Kiểm kê tồn kho'),
@@ -159,9 +189,8 @@ class StockQuant(models.Model):
             'res_model': 'stock.quant',
             'type': 'ir.actions.act_window',
             'context': ctx,
-            'domain': [('location_id.usage', 'in', ['internal', 'transit']),('is_device','=', is_device)],
+            'domain': [('location_id.usage', 'in', ['internal', 'transit']), ('is_device', '=', is_device)],
             'views': [(view_id, 'list')],
-            'help':'Kho của bạn trống. Nhấn nút "Mới" để xác định số lượng sản phẩm trong kho của bạn hoặc nhập số lượng từ bảng tính thông qua menu Hành động',
+            'help': 'Kho của bạn trống. Nhấn nút "Mới" để xác định số lượng sản phẩm trong kho của bạn hoặc nhập số lượng từ bảng tính thông qua menu Hành động',
         }
         return action
-    

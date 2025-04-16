@@ -62,7 +62,6 @@ patch(PaymentScreen.prototype, {
     const hours = String(now.getHours()).padStart(2, "0"); // Hours (hh)
     const minutes = String(now.getMinutes()).padStart(2, "0"); // Minutes (MM)
     const seconds = String(now.getSeconds()).padStart(2, "0"); // Seconds (SS)
-
     return `${year}${month}${day}${hours}${minutes}${seconds}`;
   },
 
