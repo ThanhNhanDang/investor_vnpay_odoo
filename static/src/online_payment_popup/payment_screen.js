@@ -98,9 +98,8 @@ patch(PaymentScreen.prototype, {
     const expDate = this.getVNPayExpDate();
     const expDateFull = this.getVNPayExpDateFull();
     const order_reference =
-      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${
-        this.currentOrder.id
-      }${paymentLine.payment_method_id.id}`.substring(0, 15);
+      `${user.partnerId.toString()}${this.env.services.company.currentCompany.id.toString()}${this.currentOrder.id
+        }${paymentLine.payment_method_id.id}`.substring(0, 15);
     try {
       const response = await this.env.services.orm.call(
         "payment.provider",
@@ -153,14 +152,27 @@ patch(PaymentScreen.prototype, {
     return `${hours} giờ:${minutes} phút`;
   },
 
-  
+  checkOperatingSystem() {
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    if (/windows/.test(userAgent)) {
+      return 'Windows';
+    } else if (/android/.test(userAgent)) {
+      return 'Android';
+    } else {
+      return 'Unknown';
+    }
+  },
 
   //@override
   async _isOrderValid(isForceValidate) {
+    if (this.checkOperatingSystem() === 'Windows') {
+
+
+    }
     if (!(await super._isOrderValid(...arguments))) {
       return false;
     }
-
     if (!this.payment_methods_from_config.some((pm) => pm.is_online_payment)) {
       return true;
     }
@@ -258,7 +270,6 @@ patch(PaymentScreen.prototype, {
                 },
               }
             );
-
 
             const paymentResult = await new Promise((resolve) => {
               onlinePaymentLine.onlinePaymentResolver = resolve;
@@ -568,51 +579,36 @@ patch(PaymentScreen.prototype, {
   },
 
   async downloadReceipt() {
-    const order = this.pos.models["pos.order"].getBy(
-      "uuid",
-      this.currentOrder.uuid
-    );
-    order.tracking_number = "S" + order.tracking_number;
+    const os = this.checkOperatingSystem()
+    if (os === 'Windows') {
+      console.log("Đang chạy trên Windows");
+      return;
+    }
+    else if (os === 'Android') {
+      const order = this.pos.models["pos.order"].getBy(
+        "uuid",
+        this.currentOrder.uuid
+      );
+      order.tracking_number = "S" + order.tracking_number;
 
-    // // const link = document.createElement("a");
-    // // const currentDate = formatDateTime(luxon.DateTime.now(), {
-    // //   format: "MM_dd_yyyy-HH_mm_ss",
-    // // });
-    // // const companyName =
-    // //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
-    // // link.download = `${companyName}-${currentDate}.png`;
-    // const data = this.pos.orderExportForPrinting(order);
-    // const Jpeg = await this.renderer.toJpeg(
-    //   CustomPrintOrderReceipt,
-    //   {
-    //     data: data,
-    //     formatCurrency: this.formatMonetary.bind(this),
-    //   },
-    //   {}
-    // );
-    // link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
-    // link.click();
-    const printItems = [];
-    const newLocal = order.lines.forEach((element) => {
-      const element_qty = parseInt(element.qty);
-      for (let i = 0; i < element_qty; i++) {
-        const printData = {
-          data: this.drawTextSendPrintNote(
-            element.full_product_name,
-            !element.note ? "" : " " + element.note
-          ),
-        };
-        printItems.push(printData);
-      }
-    });
-    const result = { type: "PRINT_LABEL", datas: printItems };
-    if (this.webSocket.isConnect() == 1) {
-      // this.webSocket.send(
-      //   JSON.stringify({
-      //     type: "PRINT_RECEIPT",
-      //     image: Jpeg,
-      //   })
+      // // const link = document.createElement("a");
+      // // const currentDate = formatDateTime(luxon.DateTime.now(), {
+      // //   format: "MM_dd_yyyy-HH_mm_ss",
+      // // });
+      // // const companyName =
+      // //   this.env.services.company.currentCompany.name.replaceAll(" ", "_");
+      // // link.download = `${companyName}-${currentDate}.png`;
+      // const data = this.pos.orderExportForPrinting(order);
+      // const Jpeg = await this.renderer.toJpeg(
+      //   CustomPrintOrderReceipt,
+      //   {
+      //     data: data,
+      //     formatCurrency: this.formatMonetary.bind(this),
+      //   },
+      //   {}
       // );
+      // link.href = png.toDataURL().replace("data:image/jpeg;base64,", "");
+      // link.click();
       const printItems = [];
       const newLocal = order.lines.forEach((element) => {
         const element_qty = parseInt(element.qty);
@@ -627,7 +623,29 @@ patch(PaymentScreen.prototype, {
         }
       });
       const result = { type: "PRINT_LABEL", datas: printItems };
-      this.webSocket.send(JSON.stringify(result));
+      if (this.webSocket.isConnect() == 1) {
+        // this.webSocket.send(
+        //   JSON.stringify({
+        //     type: "PRINT_RECEIPT",
+        //     image: Jpeg,
+        //   })
+        // );
+        const printItems = [];
+        const newLocal = order.lines.forEach((element) => {
+          const element_qty = parseInt(element.qty);
+          for (let i = 0; i < element_qty; i++) {
+            const printData = {
+              data: this.drawTextSendPrintNote(
+                element.full_product_name,
+                !element.note ? "" : " " + element.note
+              ),
+            };
+            printItems.push(printData);
+          }
+        });
+        const result = { type: "PRINT_LABEL", datas: printItems };
+        this.webSocket.send(JSON.stringify(result));
+      }
     }
   },
 
