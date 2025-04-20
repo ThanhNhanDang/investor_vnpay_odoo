@@ -26,7 +26,7 @@ export const webSocketService = {
 
     function connect() {
       if (isDisconnect) return;
-      const wsUri = "ws://127.0.0.1:8080/";
+      const wsUri = "ws://127.0.0.1:5000/";
       try {
         websocket = new WebSocket(wsUri);
       } catch (error) {

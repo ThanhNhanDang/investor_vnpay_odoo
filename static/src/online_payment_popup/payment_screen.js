@@ -27,11 +27,11 @@ patch(PaymentScreen.prototype, {
     this.notification = useService("notification");
     this.renderer = useService("renderer");
     onWillStart(async () => await this.initialize());
-    onWillUnmount(this.webSocket.disconnect);
+    // onWillUnmount(this.webSocket.disconnect);
   },
   async initialize() {
-    this.webSocket.connect();
-    this.webSocket.onMessage(this.handleWebSocketMessage.bind(this));
+        this.webSocket.connect();
+        this.webSocket.onMessage(this.handleWebSocketMessage.bind(this));
   },
   async handleWebSocketMessage(e) {
     try {
@@ -153,15 +153,16 @@ patch(PaymentScreen.prototype, {
   },
 
   checkOperatingSystem() {
-    const userAgent = navigator.userAgent.toLowerCase();
+    return 'Android';
+    // const userAgent = navigator.userAgent.toLowerCase();
 
-    if (/windows/.test(userAgent)) {
-      return 'Windows';
-    } else if (/android/.test(userAgent)) {
-      return 'Android';
-    } else {
-      return 'Unknown';
-    }
+    // if (/windows/.test(userAgent)) {
+    //   return 'Windows';
+    // } else if (/android/.test(userAgent)) {
+    //   return 'Android';
+    // } else {
+    //   return 'Unknown';
+    // }
   },
 
   //@override

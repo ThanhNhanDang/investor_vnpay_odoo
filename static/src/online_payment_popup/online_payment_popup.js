@@ -101,14 +101,16 @@ patch(OnlinePaymentPopup.prototype, {
     this.displayExpTime = this.props.displayExpTime || "";
   },
   checkOperatingSystem() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    if (/windows/.test(userAgent)) {
-      return 'Windows';
-    } else if (/android/.test(userAgent)) {
-      return 'Android';
-    } else {
-      return 'Unknown';
-    }
+    return 'Android';
+
+    // const userAgent = navigator.userAgent.toLowerCase();
+    // if (/windows/.test(userAgent)) {
+    //   return 'Windows';
+    // } else if (/android/.test(userAgent)) {
+    //   return 'Android';
+    // } else {
+    //   return 'Unknown';
+    // }
   },
   async handleWebSocketMessage(e) {
     try {

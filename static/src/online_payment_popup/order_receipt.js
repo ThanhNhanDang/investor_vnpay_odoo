@@ -33,7 +33,7 @@ patch(OrderReceipt.prototype, {
           if (!dialogElement) {
             console.error("Không tìm thấy element Dialog");
             return;
-          }
+          } 
 
           // Sử dụng html2canvas để chụp màn hình
           const canvas = await html2canvas(dialogElement, {
@@ -62,14 +62,15 @@ patch(OrderReceipt.prototype, {
     });
   },
   checkOperatingSystem() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    if (/windows/.test(userAgent)) {
-      return 'Windows';
-    } else if (/android/.test(userAgent)) {
-      return 'Android';
-    } else {
-      return 'Unknown';
-    }
+    return 'Android';
+    // const userAgent = navigator.userAgent.toLowerCase();
+    // if (/windows/.test(userAgent)) {
+    //   return 'Windows';
+    // } else if (/android/.test(userAgent)) {
+    //   return 'Android';
+    // } else {
+    //   return 'Unknown';
+    // }
   },
   async handleWebSocketMessage(e) {
     try {
