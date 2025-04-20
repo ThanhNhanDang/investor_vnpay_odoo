@@ -33,19 +33,23 @@ patch(OrderReceipt.prototype, {
           if (!dialogElement) {
             console.error("Không tìm thấy element Dialog");
             return;
-          } 
+          }
 
-          // Sử dụng html2canvas để chụp màn hình
-          const canvas = await html2canvas(dialogElement, {
-            scale: 2, // Tăng độ phân giải
-            useCORS: true, // Hỗ trợ tải hình ảnh từ URL khác
-          });
-          // Chuyển canvas thành ảnh PNG
-          const imgData = canvas
-            .toDataURL("image/jpeg")
-            .replace("data:image/jpeg;base64,", "");
-          // Tạo link tải ảnh
+
           if (this.webSocket.isConnect() == 1) {
+            // Sử dụng html2canvas để chụp màn hình
+            const canvas = await html2canvas(dialogElement, {
+              scale: 2, // Tăng độ phân giải
+              useCORS: true, // Hỗ trợ tải hình ảnh từ URL khác
+            });
+            // Chuyển canvas thành ảnh PNG
+            const imgData = canvas
+              .toDataURL("image/jpeg")
+              .replace("data:image/jpeg;base64,", "");
+            console.log("Gửi ảnh đến máy in", JSON.stringify({
+              type: "PRINT_RECEIPT",
+              image: imgData,
+            }));
             this.webSocket.send(
               JSON.stringify({
                 type: "PRINT_RECEIPT",
@@ -53,7 +57,6 @@ patch(OrderReceipt.prototype, {
               })
             );
           }
-
           console.log("Ảnh đã được tải xuống!");
         }
       } catch (error) {
