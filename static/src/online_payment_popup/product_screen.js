@@ -2,10 +2,11 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
-import { useBarcodeReader } from "@point_of_sale/app/barcode/barcode_reader_hook";
+import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
+import { SelectionPopup } from "@point_of_sale/app/utils/input_popups/selection_popup";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
-import { onMounted, useState, onWillUnmount, onWillStart } from "@odoo/owl";
+import { onMounted } from "@odoo/owl";
 import {
   BACKSPACE,
   DEFAULT_LAST_ROW,
@@ -30,7 +31,7 @@ export function getButtons(lastRow, rightColumn) {
     { value: "9" },
     ...(rightColumn ? [rightColumn[3]] : []),
     ...lastRow,
-    ...[],
+    { value: "pricelist",  text: "Bảng giá" },
   ];
 }
 patch(ProductScreen.prototype, {
@@ -46,13 +47,49 @@ patch(ProductScreen.prototype, {
       // the callbacks in `onMounted` hook.
       this.numberBuffer.reset();
     });
-    
+
     this.numberBuffer.use({
       useWithBarcode: true,
     });
   },
-  
+  async clickPricelist() {
+    // Create the list to be passed to the SelectionPopup.
+    // Pricelist object is passed as item in the list because it
+    // is the object that will be returned when the popup is confirmed.
+    const selectionList = this.pos.models["product.pricelist"].map(
+      (pricelist) => ({
+        id: pricelist.id,
+        label: pricelist.name,
+        isSelected:
+          this.currentOrder.pricelist_id &&
+          pricelist.id === this.currentOrder.pricelist_id.id,
+        item: pricelist,
+      })
+    );
+
+    if (!this.pos.config.pricelist_id) {
+      selectionList.push({
+        id: null,
+        label: _t("Default Price"),
+        isSelected: !this.currentOrder.pricelist_id,
+        item: null,
+      });
+    }
+
+    const payload = await makeAwaitable(this.dialog, SelectionPopup, {
+      title: _t("Select the pricelist"),
+      list: selectionList,
+    });
+
+    if (payload) {
+      this.pos.selectPricelist(payload);
+    }
+  },
   onNumpadClick(buttonValue) {
+    if (buttonValue === "pricelist") {
+      // console.log(this);
+      this.clickPricelist();
+    }
     if (["quantity", "discount", "price"].includes(buttonValue)) {
       this.numberBuffer.capture();
       this.numberBuffer.reset();
@@ -71,9 +108,9 @@ patch(ProductScreen.prototype, {
       Backspace: "o_colorlist_item_color_transparent_1",
       "-": "o_colorlist_item_color_transparent_3",
       C: "o_colorlist_item_color_transparent_5",
+      "Bảng giá": "o_colorlist_item_color_transparent_4",
     };
-
-    return getButtons(DEFAULT_LAST_ROW, [
+    const buttons = getButtons(DEFAULT_LAST_ROW, [
       { value: "quantity", text: _t("Qty") },
       {
         value: "discount",
@@ -108,5 +145,6 @@ patch(ProductScreen.prototype, {
             }
         `,
     }));
+    return buttons;
   },
 });
